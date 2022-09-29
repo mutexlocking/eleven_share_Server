@@ -1,12 +1,23 @@
+//query dsl 을 위함
+buildscript {
+    ext {
+        queryDslVersion = "5.0.0"
+    }
+}
+
+
 plugins {
     id 'org.springframework.boot' version '2.7.3'
     id 'io.spring.dependency-management' version '1.0.13.RELEASE'
+    //querydsl 추가
+    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
     id 'java'
 }
 
 group = 'com.konkuk'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = '11'
+
 
 configurations {
     compileOnly {
@@ -20,12 +31,27 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation' // BEAN VALIDATION 을 위함
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.webjars:stomp-websocket:2.3.3-1'
 
-    // log
-    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    //Util 성 라이브러리 추가
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    implementation group: 'commons-codec', name: 'commons-codec', version: '1.15'
+
+    // QueryDSL JPA
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+    implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
+
+    // JSON
+    implementation group: 'org.json', name: 'json', version: '20090211'
+
+
+
+    // log  (Log4j2와 SLF4J 가 중복되어 에러가 터졌음 -> 따라서 LOG4J2를 주석 처리 )
+    //implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 
     // Swagger
     implementation 'io.springfox:springfox-swagger-ui:2.9.2'
@@ -36,6 +62,7 @@ dependencies {
 
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     // Embedded-redis
     implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.2'
 
@@ -48,3 +75,25 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+//querydsl 추가 시작
+def querydslDir = "$buildDir/generated/querydsl"
+querydsl {
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+sourceSets {
+    main.java.srcDir querydslDir
+}
+
+compileQuerydsl {
+    options.annotationProcessorPath = configurations.querydsl
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    querydsl.extendsFrom compileClasspath
+}
+//querydsl 추가 끝
