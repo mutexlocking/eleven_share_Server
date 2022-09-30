@@ -14,33 +14,40 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.konkuk.eleveneleven.config.BaseException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class OcrService {
-//    public static void detectText() throws IOException {
-//        // TODO(developer): Replace these variables before running the sample.
-//        String filePath = "C:/Users/Administrator/Desktop/test.jpg";
-//        detectText(filePath);
-//    }
+    
+    private final AwsS3Service awsS3Service;
+
+    public void postOcrProcessImage(MultipartFile multipartFile) throws BaseException, IOException {
+        
+        /** 1. 학생증 사진을 S3에 저장 후 URL 화 */
+        String photoUrl = awsS3Service.uploadFile(multipartFile);
+        System.out.println("photoUrl = " + photoUrl);
+
+        detectText(photoUrl);
+    }
+
 
     /** Detects text in the specified image.*/
     public void detectText(String filePath) throws IOException {
         List<AnnotateImageRequest> requests = new ArrayList<>();
 
-//        // Base64 처리
-//        String base64Image = filePath.split(",")[1];
-//        byte[] imageBytes = javax.xml.bind.DatatypeConverter.parseBase64Binary(base64Image);
-//        BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
-
-        ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
+        ByteString imgBytes = ByteString.readFrom(new URL(filePath).openStream());
 
         Image img = Image.newBuilder().setContent(imgBytes).build();
         Feature feat = Feature.newBuilder().setType(Feature.Type.TEXT_DETECTION).build();

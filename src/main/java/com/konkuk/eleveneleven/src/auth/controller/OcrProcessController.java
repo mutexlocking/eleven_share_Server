@@ -1,9 +1,11 @@
 package com.konkuk.eleveneleven.src.auth.controller;
 
+import com.konkuk.eleveneleven.config.BaseException;
 import com.konkuk.eleveneleven.src.auth.service.OcrService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -17,10 +19,15 @@ public class OcrProcessController {
 
     @ResponseBody
     @PostMapping("")
-    public void postOcrProcessImage(@RequestParam("filePath") String filePath) throws IOException {
+    public void postOcrProcessImage(@RequestParam("multipartFile") MultipartFile multipartFile) throws IOException {
 
-        System.out.println("filePath = " + filePath);
-        ocrService.detectText(filePath);
+        try {
+            System.out.println("multipartFile = " + multipartFile);
+            ocrService.postOcrProcessImage(multipartFile);
+        } catch (BaseException baseException){
+
+        }
+
     }
 
 
