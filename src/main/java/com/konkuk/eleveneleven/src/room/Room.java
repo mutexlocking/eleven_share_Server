@@ -3,6 +3,7 @@ package com.konkuk.eleveneleven.src.room;
 import com.konkuk.eleveneleven.common.basic.BasicEntity;
 import com.konkuk.eleveneleven.common.enums.Gender;
 import com.konkuk.eleveneleven.common.enums.MatchingYN;
+import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.src.member.Member;
 import com.konkuk.eleveneleven.src.member_room.MemberRoom;
 import lombok.AccessLevel;
@@ -50,12 +51,12 @@ public class Room extends BasicEntity {
     }
 
     //생성자
-    public Room (Member ownerMember, String roomCode, Gender gender){
-        Room room = new Room();
-        room.setOwnerMember(ownerMember);
-        room.setRoomCode(roomCode);
-        room.setGender(ownerMember.getGender());
-        room.setMatchingYN(MatchingYN.N);
+    public Room (Member ownerMember, String roomCode){
+        this.setOwnerMember(ownerMember);
+        this.roomCode = roomCode;
+        this.gender = ownerMember.getGender();
+        this.matchingYN = MatchingYN.N;
+        this.setStatus(Status.ACTIVE);
     }
 
 }
