@@ -15,6 +15,7 @@ import lombok.Getter;
  *  2 : Room 오류
  *  3 : MemberRoom 오류
  *
+ *
  * [10단위]
  *  0~19 : Common
  *  20~39 : GET
@@ -40,7 +41,11 @@ public enum BaseResponseStatus {
     INVALID_AUTH_CODE(false,2121, "이메일 인증 코드가 일치하지 않아, 이메일 인증에 실패하였습니다."),
     FAIL_LOGIN(false, 2141, "로그인에 실패했습니다"),
     INVALID_EMAIL_DOMAIN(false, 2142, "서울시에 등록된 대학교의 이메일 도메인이 아닙니다."),
-    FAIL_SEND_EMAIL(false,2143, "인증 메일 전송에 실패하였습니다."),
+    FAIL_SEND_EMAIL(false,2142, "인증 메일 전송에 실패하였습니다."),
+    INVALID_UNIV(false,2005, "서비스 사용이 불가한 대학입니다."),
+    INVALID_USER(false,2006, "서비스 사용이 불가한 유저입니다.(대학원생)"),
+    INVALID_ID_CARD(false,2007, "유효하지 않은 학생증입니다."),
+    INVALID_IMG_FORMAT(false,2008, "유효하지 않은 이미지 형식입니다."),
 
 
     /**
@@ -57,10 +62,7 @@ public enum BaseResponseStatus {
     ENCRYPT_FAIL(false, 4003, "암호화를 실패하였습다."),
     MODIFY_OBJECT_FAIL(false, 4004, "Request 객체 변환에 실패하였습니다."),
     S3UPLOAD_ERROR(false, 4080, "파일 업로드에 실패하였습니다."),
-    MODIFY_USER_GOAL_FAIL(false,4160,"사용자 목표 변경에 실패하였습니다."),
-    MODIFY_USERINFO_FAIL(false,4161,"유저 정보 변경에 실패하였습니다."),
-    DELETE_FOOTPRINT_FAIL(false, 4260, "발자국 삭제에 실패하였습니다."),
-    MODIFY_FOOTPRINT_FAIL(false, 4261, "발자국 수정에 실패하였습니다.");
+    DETECT_TEXT_FAIL(false, 4081, "OCR 파일 분석에 실패하였습니다.");
 
     private final boolean isSuccess;
     private final int code;

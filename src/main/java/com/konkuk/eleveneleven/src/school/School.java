@@ -24,11 +24,19 @@ public class School extends BasicEntity{
     @Column(name = "email_domain")
     private String emailDomain;
 
+    @Column(name = "id_regex")
+    private String idRegex;
+
+    @Column(name = "grade_position")
+    private String gradePosition;
+
     /** [생성자] */
-    public School(String name, String emailDomain){
+    public School(String name, String emailDomain, String idRegex, String gradePosition){
         this.setStatus(Status.ACTIVE);
         this.name = name;
         this.emailDomain = emailDomain;
+        this.idRegex = idRegex;
+        this.gradePosition = gradePosition;
     }
 
 

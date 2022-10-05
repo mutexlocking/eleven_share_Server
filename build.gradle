@@ -71,6 +71,9 @@ dependencies {
     // Embedded-redis
     implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.2'
 
+    // AWS S3
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws', version: '2.2.6.RELEASE'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'mysql:mysql-connector-java'
     annotationProcessor 'org.projectlombok:lombok'
