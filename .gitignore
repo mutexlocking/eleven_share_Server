@@ -68,3 +68,6 @@ application.yml
 
 # init
 src/**/initDb.java
+
+# test
+src/test/**
