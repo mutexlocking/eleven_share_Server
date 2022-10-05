@@ -29,6 +29,11 @@ public class AuthInterceptor implements HandlerInterceptor{
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
+        /** 헤더에 isTest 값이 true 이면 인터셉터 로직을 수행하지 않고 바로 넘어가도록 */
+        if(Boolean.parseBoolean(request.getHeader("isTest"))){
+            return true;
+        }
+
         /**  1. jwtUtil을 사용하여 토큰에 저장된 kakaoId 정보를 꺼냄 */
         Optional<Claims> kakaoId = Optional.ofNullable(request.getHeader("token"))
                 .map(t -> jwtUtil.parseJwtToken(t));

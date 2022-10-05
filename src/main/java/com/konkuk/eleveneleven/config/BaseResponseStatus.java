@@ -38,9 +38,9 @@ public enum BaseResponseStatus {
     INAVALID_JWT_TOKEN(false, 2003, "인증 인가를 위한 jwt token값이 유효하지 않습니다."),
     EXPIRED_JWT_TOKEN(false, 2004, "인증 인가를 위한 jwt token의 만료 시간이 초과되었습니다."),
     INVALID_AUTH_CODE(false,2121, "이메일 인증 코드가 일치하지 않아, 이메일 인증에 실패하였습니다."),
-    FAIL_LOGIN(false, 2141, "로그인에 실패하였습니다."),
+    FAIL_LOGIN(false, 2141, "로그인에 실패했습니다"),
     INVALID_EMAIL_DOMAIN(false, 2142, "서울시에 등록된 대학교의 이메일 도메인이 아닙니다."),
-    FAIL_SEND_EMAIL(false,2142, "인증 메일 전송에 실패하였습니다."),
+    FAIL_SEND_EMAIL(false,2143, "인증 메일 전송에 실패하였습니다."),
 
 
     /**
