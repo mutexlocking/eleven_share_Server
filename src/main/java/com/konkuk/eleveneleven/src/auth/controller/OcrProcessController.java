@@ -1,6 +1,8 @@
 package com.konkuk.eleveneleven.src.auth.controller;
 
 import com.konkuk.eleveneleven.config.BaseException;
+import com.konkuk.eleveneleven.config.BaseResponse;
+import com.konkuk.eleveneleven.src.auth.dto.OcrProcessRes;
 import com.konkuk.eleveneleven.src.auth.service.OcrService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,16 +21,18 @@ public class OcrProcessController {
 
     @ResponseBody
     @PostMapping("")
-    public void postOcrProcessImage(@RequestParam("multipartFile") MultipartFile multipartFile) throws IOException {
+    public BaseResponse<OcrProcessRes> postOcrProcessImage(@RequestParam("idCardImg") MultipartFile idCardImg, @RequestParam("name") String name, @RequestParam("univ") String univ) throws IOException {
 
         try {
-            System.out.println("multipartFile = " + multipartFile);
-            ocrService.postOcrProcessImage(multipartFile);
-        } catch (BaseException baseException){
+            log.info("==== API POST /ocr ====");
+            log.info("idCardImg = " + idCardImg);
+            OcrProcessRes ocrProcessRes = ocrService.postOcrProcessImage(idCardImg, name, univ);
 
+            return new BaseResponse<>(ocrProcessRes);
+        } catch (BaseException baseException){
+            return new BaseResponse<>(baseException.getStatus());
         }
 
     }
-
 
 }
