@@ -1,6 +1,7 @@
 package com.konkuk.eleveneleven.src.member_room;
 
 import com.konkuk.eleveneleven.common.basic.BasicEntity;
+import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.src.member.Member;
 import com.konkuk.eleveneleven.src.room.Room;
 import lombok.AccessLevel;
@@ -45,9 +46,9 @@ public class MemberRoom extends BasicEntity {
 
     // 생성자
     public MemberRoom(Room room, Member member){
-        MemberRoom memberRoom = new MemberRoom();
-        memberRoom.setRoom(room);
-        memberRoom.setMember(member);
+       this.setRoom(room);
+       this.setMember(member);
+       this.setStatus(Status.ACTIVE);
     }
 
 }

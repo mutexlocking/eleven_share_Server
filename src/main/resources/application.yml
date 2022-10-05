@@ -2,6 +2,19 @@ application:
   version: 1.0.0
 spring:
 
+  mail:
+    # Google smtp server 사용
+    host: smtp.gmail.com
+    port: 587
+    username: kkt971229@gmail.com #앱 비밀번호 발급받은 google 계정
+    password: ipdrzjhbzbpjprjy    #발급받은 앱 비밀번호
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+          auth: true
+
   # multipart form data 전송방식 사용시 , 데이터 크기의 제약 사항
   servlet:
     multipart:
@@ -38,3 +51,7 @@ server:
 logging.level:
   org.hibernate.SQL: debug
 #  org.hibernate.type: trace
+
+jwt:
+  password: AA993906-44D7-47B5-87B0-1330C290CC0D
+
