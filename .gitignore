@@ -68,4 +68,4 @@ aws.yml
 application.yml
 
 # init
-initDb.java
+src/**/initDb.java
