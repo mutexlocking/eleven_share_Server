@@ -31,11 +31,12 @@ public class AwsS3Service {
 
 
     // 파일 하나 넣을 때
-    public String uploadFile(MultipartFile oneMultipartFile) throws BaseException {
+    public String uploadFile(MultipartFile oneMultipartFile, String fileName, String univ) throws BaseException {
         String photoUrl;
 
         log.debug("파일 이름: {}", oneMultipartFile.getOriginalFilename());
-        String OnefileName = createFileName(oneMultipartFile.getOriginalFilename());
+//        String OnefileName = createFileName(oneMultipartFile.getOriginalFilename());
+        String OnefileName = fileName;
         log.debug("변환된 파일 이름: {}", OnefileName);
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -44,7 +45,7 @@ public class AwsS3Service {
         log.debug("content type: {}", objectMetadata.getContentType());
 
         try (InputStream inputStream = oneMultipartFile.getInputStream()) {
-            amazonS3.putObject(new PutObjectRequest(bucket, OnefileName, inputStream, objectMetadata)
+            amazonS3.putObject(new PutObjectRequest(bucket+'/'+univ, OnefileName, inputStream, objectMetadata)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
         } catch (IOException exception) {
             throw new BaseException(BaseResponseStatus.S3UPLOAD_ERROR);

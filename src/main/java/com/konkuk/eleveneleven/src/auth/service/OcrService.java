@@ -11,10 +11,7 @@ import com.google.cloud.vision.v1.ImageAnnotatorClient;
 import com.google.protobuf.ByteString;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +27,13 @@ import com.konkuk.eleveneleven.src.school.School;
 import com.konkuk.eleveneleven.src.school.repository.SchoolRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+
+import static com.google.common.io.Files.getFileExtension;
 
 @Slf4j
 @Service
@@ -129,7 +129,10 @@ public class OcrService {
         /** 5. 학생증 사진을 S3에 저장 후 URL 화 */
         // 1. 파일 나눠서 저장
         // 2. 파일 이름을 지정
-        String photoUrl = awsS3Service.uploadFile(idCardImg);
+
+        String fileName = (univ+"_"+name+"("+student_num+")"+".").concat(getFileExtension(idCardImg.getOriginalFilename()));
+
+        String photoUrl = awsS3Service.uploadFile(idCardImg,fileName,univ);
         log.info("S3 photoURL : " + photoUrl);
 
         return OcrProcessRes.builder()
