@@ -1,13 +1,11 @@
 package com.konkuk.eleveneleven.src.member.advice;
 
-import com.google.api.gax.rpc.ApiException;
 import com.konkuk.eleveneleven.common.exceptions.ValidationFail;
 import com.konkuk.eleveneleven.common.exceptions.ValidationFailForField;
 import com.konkuk.eleveneleven.common.exceptions.ValidationFailForObject;
 import com.konkuk.eleveneleven.config.BaseException;
 import com.konkuk.eleveneleven.config.BaseResponse;
-import com.konkuk.eleveneleven.config.BaseResponseStatus;
-import com.konkuk.eleveneleven.src.member.controller.MemberApiController;
+import com.konkuk.eleveneleven.src.member.controller.MemberController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -19,11 +17,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.net.BindException;
 import java.util.stream.Collectors;
 
-import static com.konkuk.eleveneleven.config.BaseResponseStatus.FAIL_LOGIN;
-
 @Slf4j
-@RestControllerAdvice(assignableTypes = MemberApiController.class)
-public class MemberApiControllerAdvice {
+@RestControllerAdvice(assignableTypes = MemberController.class)
+public class MemberControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)

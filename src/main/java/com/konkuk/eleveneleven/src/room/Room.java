@@ -5,7 +5,7 @@ import com.konkuk.eleveneleven.common.enums.Gender;
 import com.konkuk.eleveneleven.common.enums.MatchingYN;
 import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.src.member.Member;
-import com.konkuk.eleveneleven.src.member_room.MemberRoom;
+import com.konkuk.eleveneleven.src.room_member.RoomMember;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,7 +42,7 @@ public class Room extends BasicEntity {
     private MatchingYN matchingYN;
 
     @OneToMany(mappedBy = "room")
-    private List<MemberRoom> memberRoomList = new ArrayList<>();
+    private List<RoomMember> roomMemberList = new ArrayList<>();
 
     // 연관관계 편의 메서드
     public void setOwnerMember(Member ownerMember){

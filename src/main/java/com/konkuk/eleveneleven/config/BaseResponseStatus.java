@@ -38,6 +38,7 @@ public enum BaseResponseStatus {
     NO_JWT_TOKEN(false, 2002, "인증 인가를 위한 jwt token값이 존재하지 않습니다."),
     INAVALID_JWT_TOKEN(false, 2003, "인증 인가를 위한 jwt token값이 유효하지 않습니다."),
     EXPIRED_JWT_TOKEN(false, 2004, "인증 인가를 위한 jwt token의 만료 시간이 초과되었습니다."),
+    INVALID_MEMBER(false,2101, "아직 모든 인증 과정을 다 거치지 않은 사용자 입니다."),
     INVALID_AUTH_CODE(false,2121, "이메일 인증 코드가 일치하지 않아, 이메일 인증에 실패하였습니다."),
     FAIL_LOGIN(false, 2141, "로그인에 실패했습니다"),
     INVALID_EMAIL_DOMAIN(false, 2142, "서울시에 등록된 대학교의 이메일 도메인이 아닙니다."),
@@ -46,6 +47,8 @@ public enum BaseResponseStatus {
     INVALID_USER(false,2006, "서비스 사용이 불가한 유저입니다.(대학원생)"),
     INVALID_ID_CARD(false,2007, "유효하지 않은 학생증입니다."),
     INVALID_IMG_FORMAT(false,2008, "유효하지 않은 이미지 형식입니다."),
+    INVALID_OWNER_MEMBER(false, 2141, "유효하지 않은 방장 멤버 idx 값 입니다."),
+    INVALID_ROOM(false, 2241, "유효하지 않은 방 idx 값 입니다."),
 
 
     /**
