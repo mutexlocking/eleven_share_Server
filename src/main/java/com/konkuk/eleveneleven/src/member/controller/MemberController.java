@@ -8,18 +8,15 @@ import com.konkuk.eleveneleven.src.member.request.EmailAuthRequest;
 import com.konkuk.eleveneleven.src.member.request.EmailRequest;
 import com.konkuk.eleveneleven.src.member.request.LoginRequest;
 import com.konkuk.eleveneleven.src.member.service.MemberService;
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class MemberApiController {
+public class MemberController {
 
     private final MemberService memberService;
     private final JwtUtil jwtUtil;

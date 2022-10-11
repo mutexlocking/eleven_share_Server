@@ -2,12 +2,11 @@ package com.konkuk.eleveneleven.common.init;
 
 import com.konkuk.eleveneleven.common.enums.Gender;
 import com.konkuk.eleveneleven.src.member.Member;
-import com.konkuk.eleveneleven.src.member_room.MemberRoom;
 import com.konkuk.eleveneleven.src.room.Room;
+import com.konkuk.eleveneleven.src.room_member.RoomMember;
 import com.konkuk.eleveneleven.src.school.School;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,10 +46,10 @@ public class initDb {
             em.persist(room1);
             em.flush(); em.clear();
 
-            MemberRoom memberRoom11 = new MemberRoom(room1, member1);
-            MemberRoom memberRoom21 = new MemberRoom(room1, member2);
-            MemberRoom memberRoom31 = new MemberRoom(room1, member3);
-            em.persist(memberRoom11); em.persist(memberRoom21); em.persist(memberRoom31);
+            RoomMember roomMember11 = new RoomMember(room1, member1);
+            RoomMember roomMember21 = new RoomMember(room1, member2);
+            RoomMember roomMember31 = new RoomMember(room1, member3);
+            em.persist(roomMember11); em.persist(roomMember21); em.persist(roomMember31);
             em.flush(); em.clear();
 
 

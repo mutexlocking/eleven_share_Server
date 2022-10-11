@@ -1,6 +1,5 @@
 package com.konkuk.eleveneleven.src.member.service;
 
-import com.google.api.gax.rpc.ApiException;
 import com.konkuk.eleveneleven.common.enums.Screen;
 import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.common.jwt.JwtUtil;
@@ -13,16 +12,14 @@ import com.konkuk.eleveneleven.src.member.dto.LoginMemberDto;
 import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
 import com.konkuk.eleveneleven.src.member.request.EmailRequest;
 import com.konkuk.eleveneleven.src.member.request.LoginRequest;
-import com.konkuk.eleveneleven.src.member_room.MemberRoom;
-import com.konkuk.eleveneleven.src.member_room.repository.MemberRoomRepository;
+import com.konkuk.eleveneleven.src.room_member.RoomMember;
+import com.konkuk.eleveneleven.src.room_member.repository.RoomMemberRepository;
 import com.konkuk.eleveneleven.src.school.School;
 import com.konkuk.eleveneleven.src.school.repository.SchoolRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.mail.MessagingException;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -33,7 +30,7 @@ import java.util.regex.Pattern;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final MemberRoomRepository memberRoomRepository;
+    private final RoomMemberRepository memberRoomRepository;
     private final SchoolRepository schoolRepository;
     private final JwtUtil jwtUtil;
     private final MailUtil mailUtil;
@@ -95,11 +92,11 @@ public class MemberService {
 
 
     //로그인한 Member가 Room을 만들었거나 or 다른사람이 만든 Room에 속한 경우 -> LoginMemberDto를 세팅하는 메소드
-    private void setLoginMemberDtoAtBelongRoom(LoginMemberDto loginMemberDto, MemberRoom mr){
+    private void setLoginMemberDtoAtBelongRoom(LoginMemberDto loginMemberDto, RoomMember rm){
         loginMemberDto.setScreen(Screen.ROOM_SCREEN);
         loginMemberDto.setIsBelongToRoom(true);
-        loginMemberDto.setIsRoomOwner(Optional.ofNullable(mr.getMember().getRoom()).isPresent());
-        loginMemberDto.setRoomIdx(mr.getRoom().getIdx());
+        loginMemberDto.setIsRoomOwner(Optional.ofNullable(rm.getMember().getRoom()).isPresent());
+        loginMemberDto.setRoomIdx(rm.getRoom().getIdx());
     }
 
     //로그인한 Member가 Room에 속하지 않는 경우 -> LoginMemberDto를 세팅하는 메소드
