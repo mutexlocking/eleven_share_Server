@@ -20,7 +20,8 @@ public class SocketConfig implements WebSocketConfigurer{
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 
         // WebSocket 접속을 위한 EndPoint
-        // => ws://localhost:8080/ws/connect
+        // => ws://localhost:3000/ws/connect
         registry.addHandler(socketHandler, "ws/connect").setAllowedOrigins("*");
     }
 }
+

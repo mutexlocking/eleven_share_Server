@@ -42,15 +42,15 @@ public class initDb {
             em.persist(member1); em.persist(member2); em.persist(member3);
             em.flush(); em.clear();
 
-            Room room1 = new Room(member1, "abcde");
-            em.persist(room1);
-            em.flush(); em.clear();
-
-            RoomMember roomMember11 = new RoomMember(room1, member1);
-            RoomMember roomMember21 = new RoomMember(room1, member2);
-            RoomMember roomMember31 = new RoomMember(room1, member3);
-            em.persist(roomMember11); em.persist(roomMember21); em.persist(roomMember31);
-            em.flush(); em.clear();
+//            Room room1 = new Room(member1, "abcde");
+//            em.persist(room1);
+//            em.flush(); em.clear();
+//
+//            RoomMember roomMember11 = new RoomMember(room1, member1);
+//            RoomMember roomMember21 = new RoomMember(room1, member2);
+//            RoomMember roomMember31 = new RoomMember(room1, member3);
+//            em.persist(roomMember11); em.persist(roomMember21); em.persist(roomMember31);
+//            em.flush(); em.clear();
 
 
             School school1  = new School("가톨릭대학교", "catholic.ac.kr","^20[0-5]\\d{6}$","2-3");

@@ -23,7 +23,7 @@ public class MemberControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public BaseResponse MemberApiExceptionHandler(BaseException e){
+    public BaseResponse MemberExceptionHandler(BaseException e){
         log.error("EXCEPTION = {} , INTERNAL_MESSAGE = {}", e.getStatus(), e.getInternalMessage());
         return new BaseResponse(e.getStatus());
     }

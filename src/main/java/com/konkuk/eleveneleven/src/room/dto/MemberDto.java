@@ -7,10 +7,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RoomMemberDto {
+@ToString
+public class MemberDto {
+
     private String name;
     private String schoolName;
     private String major;
-    private Boolean isOwner;
-
 }
