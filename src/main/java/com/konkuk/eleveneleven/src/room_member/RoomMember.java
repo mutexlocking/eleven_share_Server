@@ -51,5 +51,10 @@ public class RoomMember extends BasicEntity {
         this.setStatus(Status.ACTIVE);
     }
 
+    /** [변경메서드] */
+    public void update(Status status){
+        this.setStatus(status);
+    }
+
 }
 

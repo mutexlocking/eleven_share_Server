@@ -81,7 +81,8 @@ public class MemberService {
                 .schoolName(member.getSchoolName())
                 .status(member.getStatus()).build();
 
-        memberRoomRepository.findByMemberIdx(member.getIdx()).ifPresentOrElse(
+        //** */
+        memberRoomRepository.findByMemberIdxAndStatus(member.getIdx(), Status.ACTIVE).ifPresentOrElse(
                 mr -> setLoginMemberDtoAtBelongRoom(loginMemberDto, mr),
                 () -> setLoginMemberDtoAtNotBelongRoom(loginMemberDto)
         );
