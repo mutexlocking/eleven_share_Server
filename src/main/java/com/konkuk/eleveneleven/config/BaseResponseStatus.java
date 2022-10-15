@@ -38,6 +38,7 @@ public enum BaseResponseStatus {
     NO_JWT_TOKEN(false, 2002, "인증 인가를 위한 jwt token값이 존재하지 않습니다."),
     INAVALID_JWT_TOKEN(false, 2003, "인증 인가를 위한 jwt token값이 유효하지 않습니다."),
     EXPIRED_JWT_TOKEN(false, 2004, "인증 인가를 위한 jwt token의 만료 시간이 초과되었습니다."),
+    INVALID_MEMBER(false,2101, "아직 모든 인증 과정을 다 거치지 않은 사용자 입니다."),
     INVALID_AUTH_CODE(false,2121, "이메일 인증 코드가 일치하지 않아, 이메일 인증에 실패하였습니다."),
     FAIL_LOGIN(false, 2141, "로그인에 실패했습니다"),
     INVALID_EMAIL_DOMAIN(false, 2142, "서울시에 등록된 대학교의 이메일 도메인이 아닙니다."),
@@ -46,6 +47,14 @@ public enum BaseResponseStatus {
     INVALID_USER(false,2006, "서비스 사용이 불가한 유저입니다.(대학원생)"),
     INVALID_ID_CARD(false,2007, "유효하지 않은 학생증입니다."),
     INVALID_IMG_FORMAT(false,2008, "유효하지 않은 이미지 형식입니다."),
+    INVALID_OWNER_MEMBER(false, 2141, "유효하지 않은 방장 멤버 idx 값 입니다."),
+    INVALID_ROOM(false, 2241, "유효하지 않은 방 idx 값 입니다."),
+    INVALID_ROOM_CODE(false, 2261, "유효하지 않은 방 참여코드 입니다."),
+    BELONG_TO_ANOTHER_ROOM(false, 2262, "사용자가 이미 방에 소속되어 있습니다."),
+    BELONG_TO_THE_ROOM(false,2263, "사용자가 이미 그 참여코드의 방에 소속되어 있습니다."),
+    NESTED_BELONT_TO_ROOM(false, 2341, "사용자가 이미 해당 방에 참여한 상태입니다."),
+    DELETED_ROOM(false, 2342, "해당 방은 이미 삭제되었습니다."),
+    NOT_BELONG_TO_ROOM(false, 2461, "사용자는 어느 방에도 속해있지 않습니다."),
 
 
     /**
@@ -61,6 +70,7 @@ public enum BaseResponseStatus {
     MODIFY_WKT_FAIL(false, 4002, "WKT 변환을 실패하였습니다."),
     ENCRYPT_FAIL(false, 4003, "암호화를 실패하였습다."),
     MODIFY_OBJECT_FAIL(false, 4004, "Request 객체 변환에 실패하였습니다."),
+    FAIL_WEB_SOCKET_CONNECTION(false, 2005, "웹소켓 연결에 실패하였습니다."),
     S3UPLOAD_ERROR(false, 4080, "파일 업로드에 실패하였습니다."),
     DETECT_TEXT_FAIL(false, 4081, "OCR 파일 분석에 실패하였습니다.");
 

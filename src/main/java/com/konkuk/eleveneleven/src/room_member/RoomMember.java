@@ -1,4 +1,4 @@
-package com.konkuk.eleveneleven.src.member_room;
+package com.konkuk.eleveneleven.src.room_member;
 
 import com.konkuk.eleveneleven.common.basic.BasicEntity;
 import com.konkuk.eleveneleven.common.enums.Status;
@@ -14,13 +14,13 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name = "member_room")
+@Table(name = "room_member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // protected 기본 생성자를 추가해줌 (JPA 규약 상 의무적으로 필요함)
-public class MemberRoom extends BasicEntity {
+public class RoomMember extends BasicEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "member_room_idx")
+    @Column(name = "room_member_idx")
     private Long idx;
 
     @JoinColumn(name = "room_idx")
@@ -35,20 +35,25 @@ public class MemberRoom extends BasicEntity {
 
     public void setRoom(Room room){
         this.room = room;
-        room.getMemberRoomList().add(this);
+        room.getRoomMemberList().add(this);
     }
 
 
     public void setMember(Member member){
         this.member = member;
-        member.setMemberRoom(this);
+        member.setRoomMember(this);
     }
 
     // 생성자
-    public MemberRoom(Room room, Member member){
-       this.setRoom(room);
-       this.setMember(member);
-       this.setStatus(Status.ACTIVE);
+    public RoomMember(Room room, Member member){
+        this.setRoom(room);
+        this.setMember(member);
+        this.setStatus(Status.ACTIVE);
+    }
+
+    /** [변경메서드] */
+    public void update(Status status){
+        this.setStatus(status);
     }
 
 }

@@ -18,9 +18,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * /topic 이라는 prefix는 메세지가 1:다로 송신될 때 주로 사용한다고 함
      */
 
+
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/sub"); // 바로 메세지 브로커로 메세지를 봅내는 경우
+        /** 해당 값이 prefix로 붙은 메세지가 송신되었을 때 , 그 메세지를 메세지 브로커가 처리하겠다
+         * 여기서는 /queue , /topic으로 시작하는 url로 메세지가 전송되면 -> 메세지 브로커가 그 메세지를 받고 , 구독자들에게 전달해줌 */
+        config.enableSimpleBroker("/sub", "/topic"); // 바로 메세지 브로커로 메세지를 봅내는 경우
+
+        /** setApplicationDestinatinoPrefixes() 는 메세지를 가공하는 핸들러로 메세지가 라우팅 되도록 하는 설정 */
         config.setApplicationDestinationPrefixes("/pub"); // 가공 등을 위해 메세지 핸들러로 보냄 - 거기서 가공 후 - 메세지 브로커로 보냄냄    }
     }
 
