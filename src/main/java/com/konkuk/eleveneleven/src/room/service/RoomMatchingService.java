@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -67,12 +68,16 @@ public class RoomMatchingService {
             femaleRoomList = randSortList(femaleRoomList,maleRoomList.size());
         }
 
+
+
     }
 
     /** [ 리스트 요소를 랜덤 추출 ] */
     private List<Room> randSortList(List<Room> unsortedList, int criteriaSize){
         Collections.shuffle(unsortedList);
         unsortedList.subList(0,criteriaSize);
+
+        // 매칭 안된 
 
         return unsortedList;
     }
@@ -84,6 +89,7 @@ public class RoomMatchingService {
                 .forEach(i -> updateRoomMember(femaleRoomList.get(i).getIdx(), maleRoomList.get(i)) );
 
         // 2. 매칭된 FEMALE ROOM 삭제
+        deleteNotMatchRoom(femaleRoomList);
     }
 
     /** FEMALE RoomMember의 Room을 남자 Room으로 변경 */
@@ -93,8 +99,10 @@ public class RoomMatchingService {
     }
 
     /** [ 매칭 안된 방들 삭제 ] */
-    public void deleteNotMatchRoom(){
-
+    public void deleteNotMatchRoom(List<Room> deleteRoomList){
+        roomRepository.deleteAllById(deleteRoomList.stream()
+                .map(drl -> drl.getIdx())
+                .collect(Collectors.toList()));
     }
 
 
