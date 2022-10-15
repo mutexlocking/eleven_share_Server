@@ -56,5 +56,9 @@ public class RoomMember extends BasicEntity {
         this.setStatus(status);
     }
 
+    public void updateRoom(Room room){
+        this.setRoom(room);
+    }
+
 }
 
