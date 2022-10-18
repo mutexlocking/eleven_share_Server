@@ -4,6 +4,7 @@ import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.src.room.Room;
 import com.konkuk.eleveneleven.src.room_member.RoomMember;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,6 +23,10 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
 
     @Query("select rm from RoomMember rm where rm.idx=:idx")
     RoomMember findByIdx(@Param("idx") Long idx);
+
+    @Modifying
+    @Query("UPDATE RoomMember rm SET rm.room = :newRoom where rm.room = :beforeRoom")
+    void updateRoomMemberRoom(@Param("newRoom") Room newRoom, @Param("beforeRoom") Room beforeRoom);
 
 
 }

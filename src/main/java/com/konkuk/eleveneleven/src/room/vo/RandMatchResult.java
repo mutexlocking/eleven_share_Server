@@ -8,16 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class RandMatchResult {
-    private Map<Gender, List<Room>> failMatchRoomMap;
-    private List<Room> successMatchRoomMale;
-    private List<Room> successMatchRoomFemale;
+    private List<Long> failMatchRoomList;
+    private List<Long> successMatchRoomList;
 
-    @Builder
-    public RandMatchResult(Map<Gender, List<Room>> failMatchRoomMap, List<Room> successMatchRoomMale, List<Room> successMatchRoomFemale) {
-        this.failMatchRoomMap = failMatchRoomMap;
-        this.successMatchRoomMale = successMatchRoomMale;
-        this.successMatchRoomFemale = successMatchRoomFemale;
-    }
 }
