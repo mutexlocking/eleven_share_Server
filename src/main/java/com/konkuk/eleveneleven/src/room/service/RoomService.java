@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class RoomService {
 
+    private final EntityManager em;
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
     private final RoomMemberRepository roomMemberRepository;
@@ -70,19 +73,18 @@ public class RoomService {
     /** 검증 로직 : 인증을 다 마치지 않은 , ACTIVE가 아닌 사용자가 방을 만들려고 하면 -> 예외를 터뜨릴 것 */
     private void checkMemberStatus(Member ownerMember){
         if(ownerMember.getStatus()!= Status.ACTIVE){
-            throw new BaseException(BaseResponseStatus.INVALID_MEMBER, "방만들기 진행 시 : 방을 만들기 전 , 방을 만들려고 하는 방장 사용자의 인증 상태를 검사하였는데, 아직 모든 인증이 다 진행되지 않은 ONGOING 상태이다.");
+            throw new BaseException(BaseResponseStatus.INVALID_MEMBER, "방만들기 진행 시 : 방을 만들기 전 , 방을 만들려고 하는 방장 사용자의 인증 상태를 검사하였는데, 아직 모든 인증이 다 진행되지 않은 ONGOING 상태이다. or 심지어 비활성화된 INACTIVE 일수도 있다.");
         }
     }
 
     @Transactional
     public RoomDto createRoom(Long kakaoId){
 
-        //0. kakaoId로 방장인 Member 조회 (kakaoId에 대한 유효성 검사는 끝난 상태 )
+        //0. kakaoId로 방장인 Member 조회 (kakaoId에 대한 유효성 검사는 끝난 상태 -> 하지만 모든 인증을 거쳐 ACTIVE 상태가 되었는지는 비확인)
         Member ownerMember = memberRepository.findByKakaoId(kakaoId);
 
         //1. 그 방을 만들려는 Member가 , 1차 2차 인증과정을 모두 마쳐서 상태가 status 가 되었는지를 check
         checkMemberStatus(ownerMember);
-
         //1_2. 그리고 이미 이 사람이 특정 방에 속해있는지 검사 -> 참여자로든 or 방장으로든 어떤 방에 속해있다면 , 새로운 방을 만들 수 없음
         checkBelongAnotherRoom(ownerMember);
 
@@ -116,11 +118,15 @@ public class RoomService {
     }
 
 
+    /** 여기서 검증해야할 껀 -> 참여할 수 있는 방이 있냐 ? 없냐 ?
+     * 방에 삭제되었건
+     * 방 참여 코드가 유효하지 않건
+     * 여기서는 해당 방코드로 식별 가능한 ACTIVE한 방이 있냐 없냐!!
+     * 있으면 해당 roomCode는 유효하다!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * 그럼에도 클라이언트 입장에서는 방이 섹제된 경우를 구분 해 줄 필요가 있다고 판단하여 한 번 더 쿼리를 날린다! */
     private void checkRoomCode(String roomCode){
 
-        if(roomRepository.existsByRoomCodeAndStatus(roomCode,Status.INACTIVE)){
-            throw new BaseException(BaseResponseStatus.DELETED_ROOM, "방 참여시 발생 : 해당 참여코드의 방은 이미 삭제되었습니다.");
-        }
 
         if(roomRepository.existsByRoomCodeAndStatus(roomCode,Status.ACTIVE)==false){
             throw new BaseException(BaseResponseStatus.INVALID_ROOM_CODE, "방 참여시 발생 : 방 참여코드가 유효하지 않아 특정 방에 참여 불가");
@@ -129,27 +135,25 @@ public class RoomService {
 
     private void checkBelongAnotherRoom(Member member){
 
+        /** 여기서 ACITVE가 안들어가주면 , 과거의 참여한 RoomMember일 수 있으니 , 현재 활성화된 RoomMember로 참여하고 있는지를 check! */
         if(roomMemberRepository.existsByMemberIdxAndStatus(member.getIdx(), Status.ACTIVE)){
-            throw new BaseException(BaseResponseStatus.BELONG_TO_ANOTHER_ROOM, "방 참여시 발생 : 방에 참여하려는 사용자가 , 현재 이미 다른 방에 소속되어 있기 때문에, 더이상 다른 방에 참여할 수 or 만들 수 없습니다.");
+            throw new BaseException(BaseResponseStatus.BELONG_TO_ANOTHER_ROOM, "방 생성 or 참여시 발생 : 방에 참여하려는 사용자가 , 현재 이미 다른 방에 소속되어 있기 때문에, 더이상 다른 방에 참여할 수 or 만들 수 없습니다.");
         }
     }
 
 
 
-    private Long belongToRoom(Member member, String roomCode){
-
-        //Member는 인자로 넘어왔으니깐 , roomCode를 가지고 Room만 조회하여
-        Room room = roomRepository.findByRoomCode(roomCode);
+    private Long belongToRoom(Member member, Room room){
 
         RoomMember roomMember = new RoomMember(room, member);
         roomMemberRepository.save(roomMember);
         return roomMember.getIdx();
     }
 
-    private List<MemberDto>getAllRoomMembers(String roomCode){
+    private List<MemberDto> getAllRoomMembers(Room room){
         /** 주의할 점은 room과 연관된 RoomMember들이 하나도 없을 수 있다면 -> 이에따라 null pointer exception이 발생할 수 있는데
          * 우리의 경우는 , 방을 생성하자 마자 방장이라는 RoomMember가 생기니깐 -> 그런 일은 일어나지 않고 -> 따라서 대비하지 않아도 됨 */
-        return roomRepository.findAtRoomCode(roomCode).getRoomMemberList()
+        return room.getRoomMemberList()
                 .stream()
                 .filter(rm -> rm.getStatus()==Status.ACTIVE) // 즉 현재 참여하고 있는 RoomMember에 한하여
                 .map(rm -> rm.getMember())
@@ -162,96 +166,90 @@ public class RoomService {
     @Transactional
     public List<MemberDto> createRoomMember(Long kakaoId, String roomCode){
 
-        //1. 방 참여코드및 중복 방 참여에 대한 유효성 검증
+        //1. 방 참여코드및 중복 방 참여에 대한 유효성 검증 -> 1차 : 유효한 방은 있냐 ? / 2차 : 사용자는 방에 참여할 자격이 되냐?
         checkRoomCode(roomCode);        /** 방 참여코드가 유효한가 */
 
         Member member = memberRepository.findByKakaoId(kakaoId);
         checkMemberStatus(member);    /** 방에 참여하려는 사용자가 혹시 1차 2차 인증 과정을 모두 거치지는 않았는지 */
         checkBelongAnotherRoom(member);/** 혹시 이미 이방 or 다른방에 참여하고 있는 사용자는 아닌가 */
-
+        /** matching.Y 된 방은 못들어가게 validaion , 성별도 같이 확인 */
 
         //2. kakaoId를 가지고 참여하고자 하는 그 Member를 조회하고
         // roomCode를 가지고 참여할 Room을 조회하여
         // 이들을 가지고 RoomMember를 생성하여 save 하므로써
         // 해당 Member를 해당 Room에 속하게 해줌
-        belongToRoom(member, roomCode);
+        Room room = roomRepository.findByRoomCodeAndStatus(roomCode, Status.ACTIVE);
+
+        belongToRoom(member, room);
 
         //3. 현재 방에 속한 모든 RoomMember의 정보를 DTO로 치환하여 반환
-        return getAllRoomMembers(roomCode);
+        return getAllRoomMembers(room);
     }
 
-    /** 인자로 넘어온 Member가 속한 방이 있는지의 여부 : 속한 방이 있어야 검증 통과*/
-    private void checkBelongRoom(Member member, String roomCode){
 
-        if(roomRepository.existsByRoomCodeAndStatus(roomCode,Status.INACTIVE)){
-            throw new BaseException(BaseResponseStatus.DELETED_ROOM, "방 참여시 발생 : 해당 참여코드의 방은 이미 삭제되었습니다.");
+
+    private void checkDeleteRoomMember(Member member){
+        Member findMember = memberRepository.findWithRoomOptional(member.getKakaoId()).orElseThrow(
+                () -> {
+                    throw new BaseException(BaseResponseStatus.NOT_BELONG_TO_ROOM, "방 삭제 or 방 나가기 시점 : 방을 삭제하거나, 방에서 나가려는 사용자는 사실 어떤 방에도 속해있지 않으므로 방에서 나가거나 방을 삭제할 수 없습니다.");
+                }
+        );
+
+        /** 혹은 연관된 RoomMember와 Room이 있다고 하더라도 -> 연관된 RoomMember가 INACTIVE 상태라면 이미 방을 나간 상태이니깐 , 조회 후에도 이를 check해줘야 함 */
+        if(findMember.getRoomMember().getStatus()==Status.INACTIVE){
+            throw new BaseException(BaseResponseStatus.NOT_BELONG_TO_ROOM, "방 삭제 or 방 나가기 시점 : 방을 삭제하거나, 방에서 나가려는 사용자는 사실 어떤 방에도 속해있지 않으므로 방에서 나가거나 방을 삭제할 수 없습니다.");
         }
+    }
 
-        /** 어느방에도 속해있지 않거나 */
-        if(roomMemberRepository.existsByMemberIdxAndStatus(member.getIdx(), Status.ACTIVE)==false){
-            throw new BaseException(BaseResponseStatus.NOT_BELONG_TO_ROOM, "방 나가기 시점 : 어느 방에도 속해있지 않은 사용자 이므로, 방을 나갈 수 가 없다.");
-        }
 
-        //속한 Room 조회
-        Room belongToRoom = roomRepository.findAtRoomCode(roomCode);
 
-        /** 혹은 특정 방에 속해있더라도 , 그 방이 roomCode의 방이 아니면 -> 검증 test 실패!*/
-        if(roomMemberRepository.existsByMemberIdxAndStatusAndRoomIdx(member.getIdx(), Status.ACTIVE, belongToRoom.getIdx())==false){
-            throw new BaseException(BaseResponseStatus.NOT_BELONG_TO_ROOM, "방 나가기 시점 : 특정 방에 속해 있지만, 중요한건 이 roomCode의 방에 속해있는 것이 아니므로 , 방을 나갈 수 없다.");
-        }
+
+    private void checkAlreadyGoOut(Member member){
+        /** ACTIVE하게 대응되는 MemberRoom이 없다는건 - 이미 삭제되었다는 뜻  */
+        roomMemberRepository.findByMemberIdxAndStatus(member.getIdx(), Status.ACTIVE).orElseThrow(
+                () -> {throw new BaseException(BaseResponseStatus.DELETED_ROOM_MEMBER, "방 삭제 or 방 나가기 시점 : 방에서 나가려는 or 방 자체를 삭제하려는 해당 사용자는 이미 방에서 나간 상태입니다.");}
+
+        );
+    }
+
+    private List<MemberDto>  deleteRoomMemberAtOwner(Member member){
+        member.getRoom().getRoomMemberList().stream()
+                .forEach(rm -> roomMemberRepository.deleteByMemberIdx(rm.getMember().getIdx()));
+
+        roomRepository.deleteByMemberIdx(member.getIdx());
+
+        return new ArrayList<>();
 
     }
 
-    private Long updateStatus(RoomMember roomMember, Status status){
-        RoomMember findRoomMember = roomMemberRepository.findByIdx(roomMember.getIdx());
-        findRoomMember.update(status);
-        return findRoomMember.getIdx();
+    private List<MemberDto>  deleteRoomMemberAtNotOwner(Member member){
+        roomMemberRepository.deleteByMemberIdx(member.getIdx());
+        return  getAllRoomMembers(member.getRoomMember().getRoom());
+
     }
 
-    private Long updateStatus(Room room , Status status){
-        Room findRoom = roomRepository.findByIdx(room.getIdx());
-        findRoom.update(Status.INACTIVE);
-        return findRoom.getIdx();
-    }
-
-    private List<MemberDto> deleteAtOwner(Member member, String roomCode){
-        member.getRoom().getRoomMemberList()
-                .forEach(rm -> updateStatus(rm, Status.INACTIVE));
-
-        updateStatus(member.getRoom(), Status.INACTIVE);
-
-        return getAllRoomMembers(roomCode);
-    }
-
-    private List<MemberDto> deleteNotOwner(Member member, String roomCode){
-        updateStatus(member.getRoomMember(), Status.INACTIVE);
-
-        return  getAllRoomMembers(roomCode);
-    }
-
-    /** 방 없애기 or 방 나가기 서비스*/
     @Transactional
-    public List<MemberDto> deleteRoom(Long kakaoId, String roomCode){
-
+    public List<MemberDto> deleteRoomMember(Long kakaoId) {
         //1. 방을 나가려는 그 Member를 조회하여
         Member member = memberRepository.findByKakaoId(kakaoId);
 
         //2. 유효성 검사 : 이 사람이 속한 방이 있는지
         checkMemberStatus(member);    /** 방에서 나가려는 사용자가 혹시 1차 2차 인증 과정을 모두 거치지는 않았는지 */
-        checkBelongRoom(member,roomCode);
+        checkAlreadyGoOut(member);    /** 방에서 나가려는 사용자가 이미 방에서 나갔는지 */
 
-        //3. kakaoId를 통해 Member~RoomMember~Room을 모두 조회
+        //3. (위 검증을 모두 겨쳤다면) kakaoId를 통해 Member~RoomMember~Room을 모두 조회
         member = memberRepository.findWithRoom(kakaoId);
 
-        //3_1. 이사람이 방장이면 해당 방의 모든 RoomMember들을 INACTIVE 시킨 후 -> 마지막으로 속한 Room을 INACTIVE 시키고
-        if(member.getRoomMember().getRoom().getOwnerMember().getKakaoId() == kakaoId){
-            return deleteAtOwner(member, roomCode);
+        //4_1. 방장이면
+        if(member.getRoomMember().getRoom().getOwnerMember().getIdx() == memberRepository.findByKakaoId(kakaoId).getIdx()) {
+            return deleteRoomMemberAtOwner(member);
         }
 
-        //3_2. 이사람이 방장이 아니면 - 자신과 대응되는 RoomMember들만 INACTIVE 시킨다.
+        //4_2. 일반 사용자면
         else{
-            return deleteNotOwner(member,roomCode);
+            return deleteRoomMemberAtNotOwner(member);
         }
+
     }
 
 }

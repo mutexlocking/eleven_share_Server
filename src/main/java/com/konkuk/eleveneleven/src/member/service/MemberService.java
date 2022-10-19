@@ -11,7 +11,6 @@ import com.konkuk.eleveneleven.src.member.dto.EmailDto;
 import com.konkuk.eleveneleven.src.member.dto.LoginMemberDto;
 import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
 import com.konkuk.eleveneleven.src.member.request.EmailRequest;
-import com.konkuk.eleveneleven.src.member.request.LoginRequest;
 import com.konkuk.eleveneleven.src.room_member.RoomMember;
 import com.konkuk.eleveneleven.src.room_member.repository.RoomMemberRepository;
 import com.konkuk.eleveneleven.src.school.School;
@@ -30,7 +29,7 @@ import java.util.regex.Pattern;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final RoomMemberRepository memberRoomRepository;
+    private final RoomMemberRepository roomMemberRepository;
     private final SchoolRepository schoolRepository;
     private final JwtUtil jwtUtil;
     private final MailUtil mailUtil;
@@ -39,15 +38,15 @@ public class MemberService {
     /**
      * 로그인 서비스
      */
-    public LoginMemberDto checkLogin(LoginRequest loginRequest) {
+    public LoginMemberDto checkLogin(Long kakaoId) {
 
-        //0. loginRequest에 있는 kakaoId의 유효성 검사
-        if (memberRepository.existsByKakaoId(loginRequest.getKakaoId()) == false) {
+        //0. 인자로 넘겨받은 kakaoId의 유효성 검사
+        if (memberRepository.existsByKakaoId(kakaoId) == false) {
             throw new BaseException(BaseResponseStatus.FAIL_LOGIN, "요청으로 들어온 kakaoId가 유효하지 않습니다.");
         }
 
         //1. 유효한 kakaoId로 JWT를 생성
-        String token = jwtUtil.createToken(loginRequest.getKakaoId().toString());
+        String token = jwtUtil.createToken(kakaoId.toString());
 
         //2. Member를 조회하여 , 다음의 상황을 판단
         /**
@@ -57,7 +56,7 @@ public class MemberService {
          * 2) 방을 만들었거나 or 다른사람이 만든 방에 소속된 경우 && 이때 매칭버튼을 누르거나 or 누르지 않았거나 -> 해당 방 화면으로 가도록 해야함
          * */
 
-        Member member = memberRepository.findByKakaoId(loginRequest.getKakaoId());
+        Member member = memberRepository.findByKakaoId(kakaoId);
 
         if (member.getStatus() == Status.ONGOING) {
             return LoginMemberDto.builder()
@@ -81,8 +80,8 @@ public class MemberService {
                 .schoolName(member.getSchoolName())
                 .status(member.getStatus()).build();
 
-        //** */
-        memberRoomRepository.findByMemberIdxAndStatus(member.getIdx(), Status.ACTIVE).ifPresentOrElse(
+        //** 해당 Member와 대응되는 (ACTIVE한) RoomMember가 존재한다는 것은 -> 그 Member는 어느 방에 소속되어 있다는 의미! */
+        roomMemberRepository.findByMemberIdxAndStatus(member.getIdx(), Status.ACTIVE).ifPresentOrElse(
                 mr -> setLoginMemberDtoAtBelongRoom(loginMemberDto, mr),
                 () -> setLoginMemberDtoAtNotBelongRoom(loginMemberDto)
         );
@@ -111,13 +110,13 @@ public class MemberService {
 
     /** 인증메일 보내는 서비스 */
     @Transactional
-    public EmailDto sendAuthMail(Long kakaoId, EmailRequest emailRequest){
+    public EmailDto sendAuthMail(Long kakaoId, String email){
 
         //0. 일단 등록된 서울시 내 대학교 메일 계정인지 확인 후
-        checkEmailDomain(emailRequest.getEmail());
+        checkEmailDomain(email);
 
         // 1. 일단 해당 메일로 인증코드를 보낸 뒤
-        String authCode = mailUtil.sendEmail(emailRequest.getEmail());
+        String authCode = mailUtil.sendEmail(email);
 
         //2. 그 인증 코드를 DB에 저장
         updateAuthCode(kakaoId, authCode);
@@ -131,12 +130,9 @@ public class MemberService {
         String emailDomain = email.split("@")[1];
 
         //2. 이후 DB에 등록된 서울시 전체 대학교의 이메일 도메인들을 대상으로 , 해당 분리시킨 도메인과 일치하는게 하나라도 있는지 check
-        List<School> schoolList = schoolRepository.findAll();
-        boolean isValidEmailDomain = schoolList.stream()
-                .anyMatch(s -> Pattern.matches(s.getEmailDomain(), emailDomain));
-
-        //3. 만약 전체 도메인들 중, 일치하는게 하나도 없다면 -> 이는 학교 계정이 아닌것으로 판별하고 예외 발생
-        if(isValidEmailDomain==false){
+        // 만약 전체 도메인들 중, 일치하는게 하나도 없다면 -> 이는 학교 계정이 아닌것으로 판별하고 예외 발생
+        /** 단 이를 자바 스트림으로 직접 확인하는게 아니라 , exist 쿼리를 날려 한방에 확인한다 <- 이런습관을 들여야 함 */
+        if(schoolRepository.existsByEmailDomain(emailDomain)==false){
             throw new BaseException(BaseResponseStatus.INVALID_EMAIL_DOMAIN, "학교 이메일 계정이 아닙니다.");
         }
 

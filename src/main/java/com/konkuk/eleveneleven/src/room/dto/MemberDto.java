@@ -13,4 +13,5 @@ public class MemberDto {
     private String name;
     private String schoolName;
     private String major;
+    private Boolean isOwner;
 }
