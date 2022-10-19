@@ -48,7 +48,7 @@ public class RoomMatchingService {
 
     /** 매일 23시에 Scheduler를 동작하여 matching 진행 */
     @Transactional
-    @Scheduled(cron = "0 0 23 * * ?")
+    @Scheduled(cron = "0 11 23 * * ?")
     public void matchRoom() {
 
         randMatchRoom();
@@ -182,7 +182,7 @@ public class RoomMatchingService {
 
             if(!roomByMemberCountMap.containsKey(memberCount)){ // 해당 멤버수 key가 없을 때 key 생성
                 roomByMemberCountMap.put(memberCount,new ArrayList<>(Arrays.asList(room)));
-            } else{
+            } else{ // 해당 멤버수 key가 있을 때 List<Room>에 추가
                 roomByMemberCountMap.get(memberCount).add(room);
             }
         }
