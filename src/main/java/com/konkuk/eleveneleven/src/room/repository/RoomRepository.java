@@ -3,6 +3,7 @@ package com.konkuk.eleveneleven.src.room.repository;
 import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.src.room.Room;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -16,8 +17,14 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     boolean existsByRoomCodeAndStatus(String roomCode, Status status);
 
-    Room findByRoomCode(String roomCode);
+    Room findByRoomCodeAndStatus(String roomCode, Status status);
 
     @Query("select r from Room r where r.idx=:idx")
     Room findByIdx(@Param("idx")Long idx);
+
+    @Modifying
+    @Query("delete from Room r where r.ownerMember.idx=:ownerMemberIdx")
+    void deleteByMemberIdx(@Param("ownerMemberIdx") Long ownerMemberIdx);
+
+
 }

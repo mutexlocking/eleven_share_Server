@@ -11,4 +11,7 @@ public interface SchoolRepository extends JpaRepository<School, Long> {
 
     List<School> findByNameAndStatus(String name, Status status);
 
+
+    boolean existsByEmailDomain(String emailDomain);
+
 }

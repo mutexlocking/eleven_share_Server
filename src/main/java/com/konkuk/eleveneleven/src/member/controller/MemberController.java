@@ -26,7 +26,7 @@ public class MemberController {
      * */
     @PostMapping("/auth/login")
     public BaseResponse<LoginMemberDto> login(@Validated @RequestBody LoginRequest loginRequest){
-        return new BaseResponse<>(memberService.checkLogin(loginRequest));
+        return new BaseResponse<>(memberService.checkLogin(loginRequest.getKakaoId()));
     }
 
     /**
@@ -35,7 +35,7 @@ public class MemberController {
     @PostMapping("/auth/email")
     public BaseResponse<EmailDto> sendEmail(@RequestAttribute Long kakaoId,
                                             @Validated @RequestBody EmailRequest emailRequest){
-        return new BaseResponse<>(memberService.sendAuthMail(kakaoId, emailRequest));
+        return new BaseResponse<>(memberService.sendAuthMail(kakaoId, emailRequest.getEmail()));
     }
 
 

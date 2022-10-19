@@ -54,6 +54,7 @@ public enum BaseResponseStatus {
     BELONG_TO_THE_ROOM(false,2263, "사용자가 이미 그 참여코드의 방에 소속되어 있습니다."),
     NESTED_BELONT_TO_ROOM(false, 2341, "사용자가 이미 해당 방에 참여한 상태입니다."),
     DELETED_ROOM(false, 2342, "해당 방은 이미 삭제되었습니다."),
+    DELETED_ROOM_MEMBER(false, 2343, "해당 사용자는 이미 방에서 나갔습니다."),
     NOT_BELONG_TO_ROOM(false, 2461, "사용자는 어느 방에도 속해있지 않습니다."),
 
 
