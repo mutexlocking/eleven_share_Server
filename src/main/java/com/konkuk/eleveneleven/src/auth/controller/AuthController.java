@@ -1,15 +1,15 @@
 package com.konkuk.eleveneleven.src.auth.controller;
 
+import com.konkuk.eleveneleven.config.BaseResponse;
+import com.konkuk.eleveneleven.src.auth.dto.PostAuthReqDto;
+import com.konkuk.eleveneleven.src.auth.dto.PostAuthResDto;
 import com.konkuk.eleveneleven.src.auth.service.AuthService;
 import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -19,9 +19,17 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @ResponseBody
     @PostMapping("")
-    public void postAuth(){
+    public BaseResponse<String> postAuth(@RequestBody PostAuthReqDto postAuthReqDto){
+
+        return new BaseResponse<>(authService.postAuth(postAuthReqDto.getKakaoId()));
+
+    }
+
+    @PostMapping("/meta")
+    public BaseResponse<String> postAuthMeta(@RequestBody PostAuthMetaReqDto postAuthReqDto){
+
+        return new BaseResponse<>(authService.postAuth(postAuthReqDto.getKakaoId()));
 
     }
 
