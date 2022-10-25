@@ -1,6 +1,7 @@
 package com.konkuk.eleveneleven.src.auth.controller;
 
 import com.konkuk.eleveneleven.config.BaseResponse;
+import com.konkuk.eleveneleven.src.auth.dto.PostAuthMetaReqDto;
 import com.konkuk.eleveneleven.src.auth.dto.PostAuthReqDto;
 import com.konkuk.eleveneleven.src.auth.dto.PostAuthResDto;
 import com.konkuk.eleveneleven.src.auth.service.AuthService;
@@ -27,9 +28,11 @@ public class AuthController {
     }
 
     @PostMapping("/meta")
-    public BaseResponse<String> postAuthMeta(@RequestBody PostAuthMetaReqDto postAuthReqDto){
+    public BaseResponse<String> postAuthMeta(@RequestBody PostAuthMetaReqDto postAuthMetaReqDto){
 
-        return new BaseResponse<>(authService.postAuth(postAuthReqDto.getKakaoId()));
+        authService.postAuthMeta(postAuthMetaReqDto);
+
+        return new BaseResponse<>("데이터 저장에 성공했습니다.");
 
     }
 

@@ -1,8 +1,10 @@
 package com.konkuk.eleveneleven.src.auth.service;
 
+import com.konkuk.eleveneleven.common.enums.Gender;
 import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.config.BaseException;
 import com.konkuk.eleveneleven.config.BaseResponseStatus;
+import com.konkuk.eleveneleven.src.auth.dto.PostAuthMetaReqDto;
 import com.konkuk.eleveneleven.src.member.Member;
 import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,26 @@ public class AuthService {
 
     }
 
+    public void postAuthMeta(PostAuthMetaReqDto postAuthMetaReqDto){
+
+        Member memberByKakaoId = memberRepository.findByKakaoId(postAuthMetaReqDto.getKakaoId());
+
+        if (memberByKakaoId.getStatus().equals(Status.INACTIVE)) {
+            throw new BaseException(BaseResponseStatus.BLACK_MEMBER,"DB상에 INACTIVE Member 존재");
+        } else if (memberByKakaoId.getStatus().equals(Status.ACTIVE)) {
+            throw new BaseException(BaseResponseStatus.ALREADY_MEMBER,"DB상에 ACTIVE Member 존재");
+        }
+
+        memberByKakaoId.setName(postAuthMetaReqDto.getName());
+        memberByKakaoId.setGender(postAuthMetaReqDto.getGender());
+        memberByKakaoId.setSchoolName(postAuthMetaReqDto.getSchoolName());
+        memberByKakaoId.setStudentId(postAuthMetaReqDto.getStudentId());
+        memberByKakaoId.setSchoolEmail(postAuthMetaReqDto.getSchoolEmail());
+        memberByKakaoId.setMajor(postAuthMetaReqDto.getMajor());
+        memberByKakaoId.setStatus(Status.ACTIVE);
+
+        memberRepository.save(memberByKakaoId);
+    }
 
 
 }
