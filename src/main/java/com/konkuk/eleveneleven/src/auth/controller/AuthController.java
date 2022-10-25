@@ -20,6 +20,9 @@ public class AuthController {
 
     private final AuthService authService;
 
+    /** kakaoId 만 저장된 Member 튜플 생성
+     * Status -> ONGOING
+     * */
     @PostMapping("")
     public BaseResponse<String> postAuth(@RequestBody PostAuthReqDto postAuthReqDto){
 
@@ -27,6 +30,9 @@ public class AuthController {
 
     }
 
+    /** kakaoId 로 Member 를 특정하여 name, gender, schoolName, studentId, schoolEmail, major 저장
+     * Stauts -> ACTIVE
+     * */
     @PostMapping("/meta")
     public BaseResponse<String> postAuthMeta(@RequestBody PostAuthMetaReqDto postAuthMetaReqDto){
 
