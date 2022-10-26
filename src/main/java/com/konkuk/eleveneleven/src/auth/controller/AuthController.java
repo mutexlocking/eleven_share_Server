@@ -1,16 +1,11 @@
 package com.konkuk.eleveneleven.src.auth.controller;
 
-import com.konkuk.eleveneleven.common.enums.Screen;
 import com.konkuk.eleveneleven.config.BaseResponse;
 import com.konkuk.eleveneleven.src.auth.dto.PostAuthMetaReqDto;
-import com.konkuk.eleveneleven.src.auth.dto.PostAuthReqDto;
 import com.konkuk.eleveneleven.src.auth.dto.PostAuthResDto;
 import com.konkuk.eleveneleven.src.auth.service.AuthService;
-import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
