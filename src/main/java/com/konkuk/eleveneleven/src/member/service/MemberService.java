@@ -80,7 +80,8 @@ public class MemberService {
                 .schoolName(member.getSchoolName())
                 .status(member.getStatus()).build();
 
-        //** 해당 Member와 대응되는 (ACTIVE한) RoomMember가 존재한다는 것은 -> 그 Member는 어느 방에 소속되어 있다는 의미! */
+        /** 해당 Member와 대응되는 (ACTIVE한) RoomMember가 존재한다는 것은 -> 그 Member는 어느 방에 소속되어 있다는 의미!
+        // 반대로 대응되는 RoomMember가 존재하지 않다는 것은 -> 그 Member는 어떤 방에도 소속되어 있지 않다는 의미! */
         roomMemberRepository.findByMemberIdxAndStatus(member.getIdx(), Status.ACTIVE).ifPresentOrElse(
                 mr -> setLoginMemberDtoAtBelongRoom(loginMemberDto, mr),
                 () -> setLoginMemberDtoAtNotBelongRoom(loginMemberDto)

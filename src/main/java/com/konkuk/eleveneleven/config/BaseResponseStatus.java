@@ -38,6 +38,7 @@ public enum BaseResponseStatus {
     NO_JWT_TOKEN(false, 2002, "인증 인가를 위한 jwt token값이 존재하지 않습니다."),
     INAVALID_JWT_TOKEN(false, 2003, "인증 인가를 위한 jwt token값이 유효하지 않습니다."),
     EXPIRED_JWT_TOKEN(false, 2004, "인증 인가를 위한 jwt token의 만료 시간이 초과되었습니다."),
+    INVALID_ROOM_TIME(false, 2005, "방생성, 방참여, 방나가기 기능은 23:12~11:10 까지는 사용할 수 없는 기능입니다."),
     INVALID_MEMBER(false,2101, "아직 모든 인증 과정을 다 거치지 않은 사용자 입니다."),
     INVALID_AUTH_CODE(false,2121, "이메일 인증 코드가 일치하지 않아, 이메일 인증에 실패하였습니다."),
     FAIL_LOGIN(false, 2141, "로그인에 실패했습니다"),
@@ -52,9 +53,15 @@ public enum BaseResponseStatus {
     INVALID_ROOM_CODE(false, 2261, "유효하지 않은 방 참여코드 입니다."),
     BELONG_TO_ANOTHER_ROOM(false, 2262, "사용자가 이미 방에 소속되어 있습니다."),
     BELONG_TO_THE_ROOM(false,2263, "사용자가 이미 그 참여코드의 방에 소속되어 있습니다."),
+    IS_NOT_OWNER(false, 2264, "해당 사용자는 그 방의 방장이 아닙니다."),
+    NOT_SUITABLE_SIZE(false, 2265, "매칭 가능한 방의 인원은 최소 2명에서 최대 6명으로 제한됩니다."),
+    ALREADY_MATCHING_STATUS(false, 2266, "해당 방은 이미 매칭 준비상태인 방 입니다."),
     NESTED_BELONT_TO_ROOM(false, 2341, "사용자가 이미 해당 방에 참여한 상태입니다."),
     DELETED_ROOM(false, 2342, "해당 방은 이미 삭제되었습니다."),
     DELETED_ROOM_MEMBER(false, 2343, "해당 사용자는 이미 방에서 나갔습니다."),
+    ALREADY_MATCHING_YN_Y(false, 2344, "이미 매칭 준비가 완료된 방입니다."),
+    INVALID_GENDER(false, 2345, "참여하려는 방의 성별과 부합하지 않습니다."),
+    OVER_NUM_OF_MEMBR(false, 2346, "참여하려는 방의 인원이 이미 6명 이상입니다."),
     NOT_BELONG_TO_ROOM(false, 2461, "사용자는 어느 방에도 속해있지 않습니다."),
 
 

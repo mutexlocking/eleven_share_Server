@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -73,14 +74,14 @@ public class SocketHandler extends TextWebSocketHandler {
                 keyMap.put(roomIdx, sessionKeyList);
 
                 //이후 전체 방에대한 sessionKeyList에 대한 Session에 , 결과 완료된 Member 정보들을 모두 보냄 (브로드캐스팅)
-                sendAll(roomIdx, memberDtoList); // id1 -> s1 -> memberDtoList
+                sendAll(roomIdx, convertJson(memberDtoList)); // id1 -> s1 -> memberDtoList
             }
             else{
                 //추가된 Member에 대한 sessionKey를 add()
                 keyMap.get(roomIdx).add(session.getId()); // <roomIdx1 , [id1 , id2]>
 
                 //이후 전체 방에대한 sessionKeyList에 대한 Session에 , 결과 완료된 Member 정보들을 모두 보냄 (브로드캐스팅)
-                sendAll(roomIdx, memberDtoList); // id1, id2 ->  ->  <id1, s1> <id3, s3>
+                sendAll(roomIdx, convertJson(memberDtoList)); // id1, id2 ->  ->  <id1, s1> <id3, s3>
             }
         } else if(role.equals("EXIT")){
             if(isOwner){
@@ -104,7 +105,7 @@ public class SocketHandler extends TextWebSocketHandler {
                 keyMap.get(roomIdx).removeIf(si -> si.equals(session.getId()));
 
                 //(2) 이후 전체 방에대한 sessionKeyList에 대한 Session에 , 결과 완료된 Member 정보들을 모두 보냄 (브로드캐스팅)
-                sendAll(roomIdx, memberDtoList);
+                sendAll(roomIdx, convertJson(memberDtoList));
 
 
                 //(3) 마지막으로 Member에 대한 sessionKey를 이용해서 -> 그 session을 강제로 close()
@@ -139,7 +140,14 @@ public class SocketHandler extends TextWebSocketHandler {
     }
 
     /** 이 Idx의 Room에 있는 모든 인원에게 , 이 memberDtoList 정보를 모두 보낸다 */
-    private void sendAll(Long roomIdx, List<MemberDto> memberDtoList){
+
+    private List<JSONObject> convertJson(List<MemberDto> memberDtoList){
+        return memberDtoList.stream()
+                .map(m -> new JSONObject(m))
+                .collect(Collectors.toList());
+    }
+
+    private void sendAll(Long roomIdx, List<JSONObject> memberDtoList){
         keyMap.get(roomIdx).stream()
                 .map(sk -> sessionMap.get(sk))
                 .forEach(s -> {
