@@ -36,20 +36,10 @@ public class OcrService {
     private final AwsS3Service awsS3Service;
     private final SchoolRepository schoolRepository;
 
-
     public OcrProcessRes postOcrProcessImage(MultipartFile idCardImg, String name, String univ) throws BaseException, IOException {
 
         String major = "";
         String student_num = "";
-
-        System.out.println("idCardImg.getInputStream().toString() = " + idCardImg.getInputStream());
-        System.out.println("idCardImg.getOriginalFilename() = " + idCardImg.getOriginalFilename());
-        System.out.println("idCardImg = " + idCardImg);
-        System.out.println("name = " + name);
-        System.out.println("univ = " + univ);
-        System.out.println("univ = " + univ.replaceAll("\n", ""));
-        System.out.println("univ.equal  = " + univ.replaceAll("\n", "").equals("건국대학교"));
-        
         
         /** 1. 학교 정보를 받음 */
         // DB에 저장되어 있는 각 학교별 학번 정규식 가져옴

@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class PostAuthMetaReqDto {
-    private Long kakaoId;
     private String name;
     private Gender gender;
     private String schoolName;
