@@ -3,6 +3,8 @@ package com.konkuk.eleveneleven.src.member;
 import com.konkuk.eleveneleven.common.basic.BasicEntity;
 import com.konkuk.eleveneleven.common.enums.Gender;
 import com.konkuk.eleveneleven.common.enums.Status;
+import com.konkuk.eleveneleven.src.matched_room.MatchedRoom;
+import com.konkuk.eleveneleven.src.matched_room_member.MatchedRoomMember;
 import com.konkuk.eleveneleven.src.room.Room;
 import com.konkuk.eleveneleven.src.room_member.RoomMember;
 import lombok.AccessLevel;
@@ -11,6 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.regex.Matcher;
 
 @Entity
 @Getter
@@ -50,6 +53,12 @@ public class Member extends BasicEntity {
 
     @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
     private RoomMember roomMember = null;
+
+    @OneToOne(mappedBy = "ownerMember", fetch = FetchType.LAZY)
+    private MatchedRoom matchedRoom = null; // 방을 만들지 않은 Member는 이 room 값이 null 이라는 점 주의 + 게다가 막 생성된 Member는 어떤 Room도 만들지 않았을테니 null로 초기화 하는것이 맞음.
+
+    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
+    private MatchedRoomMember matchedRoomMember = null;
 
     //생성자
     public Member(Long kakaoId, String name, Gender gender, String schoolName, String studentId, String schoolEmail, String major){

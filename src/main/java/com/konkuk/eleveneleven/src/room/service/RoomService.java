@@ -1,5 +1,6 @@
 package com.konkuk.eleveneleven.src.room.service;
 
+import com.konkuk.eleveneleven.common.enums.MatchingYN;
 import com.konkuk.eleveneleven.src.chat.vo.ChatRoom;
 import com.konkuk.eleveneleven.src.room.repository.RoomRepository;
 import com.konkuk.eleveneleven.src.room.vo.WaitingRoom;
@@ -10,6 +11,7 @@ import com.konkuk.eleveneleven.src.member.Member;
 import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
 import com.konkuk.eleveneleven.src.room.Room;
 import com.konkuk.eleveneleven.src.room.dto.MemberDto;
+import com.konkuk.eleveneleven.src.room.dto.ParticipateDto;
 import com.konkuk.eleveneleven.src.room.dto.RoomDto;
 import com.konkuk.eleveneleven.src.room.repository.RoomRepository;
 import com.konkuk.eleveneleven.src.room_member.RoomMember;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.konkuk.eleveneleven.common.enums.MatchingYN.Y;
 import javax.annotation.PostConstruct;
 import java.util.*;
 
@@ -117,7 +120,7 @@ public class RoomService {
                 .filter(rm -> rm.getStatus()==Status.ACTIVE)
                 .sorted((rm1, rm2) -> rm1.getCreatedAt().compareTo(rm2.getCreatedAt()))
                 .map(rm -> rm.getMember())
-                .map(m -> MemberDto.builder().name(m.getName()).schoolName(m.getSchoolName()).major(m.getMajor()).build())
+                .map(m -> MemberDto.builder().name(m.getName()).schoolName(m.getSchoolName()).major(m.getMajor()).isOwner(m.getRoom()!=null ? true : false).build())
                 .collect(Collectors.toList());
 
 
@@ -147,6 +150,24 @@ public class RoomService {
         }
     }
 
+    private void checkMatchingYnAtEnter(Room room){
+        if(room.getMatchingYN() == Y){
+            throw new BaseException(BaseResponseStatus.ALREADY_MATCHING_YN_Y, "방 참여 시점 : 참여하려는 해당 방은 이미 매칭 준비를 완료하여 , 다른 사용자가 참여할 수 없습니다.");
+        }
+    }
+
+    private void checkGender(Room room, Member member){
+        if(room.getGender() != member.getGender()){
+            throw new BaseException(BaseResponseStatus.INVALID_GENDER, "방 참여 시점 : 참여하려는 사용자의 성별이 , 방의 성별과 같지 않아 , 해당 방에 참여가 불가능합니다.");
+        }
+    }
+
+    private void checkNumOfRoomMemberAtEnter(Room room){
+        if(room.getRoomMemberList().size() >= 6){
+            throw new BaseException(BaseResponseStatus.OVER_NUM_OF_MEMBR, "방 참여 시점 : 이미 해당 방의 인원수가 6명 입니다.");
+        }
+    }
+
 
 
     private Long belongToRoom(Member member, Room room){
@@ -163,33 +184,39 @@ public class RoomService {
                 .stream()
                 .filter(rm -> rm.getStatus()==Status.ACTIVE) // 즉 현재 참여하고 있는 RoomMember에 한하여
                 .map(rm -> rm.getMember())
-                .map(m -> MemberDto.builder().name(m.getName()).schoolName(m.getSchoolName()).major(m.getMajor()).build())
+                .map(m -> MemberDto.builder().name(m.getName()).schoolName(m.getSchoolName()).major(m.getMajor()).isOwner(m.getRoom()!=null ? true : false).build())
                 .collect(Collectors.toList());
     }
 
 
     /** 특정 방 참여코드를 통해 특정 방에 참여하는 서비스 */
     @Transactional
-    public List<MemberDto> createRoomMember(Long kakaoId, String roomCode){
+    public ParticipateDto createRoomMember(Long kakaoId, String roomCode){
 
         //1. 방 참여코드및 중복 방 참여에 대한 유효성 검증 -> 1차 : 유효한 방은 있냐 ? / 2차 : 사용자는 방에 참여할 자격이 되냐?
         checkRoomCode(roomCode);        /** 방 참여코드가 유효한가 */
+        Room room = roomRepository.findByRoomCodeAndStatus(roomCode, Status.ACTIVE); // 위 테스트에서 유효하다고 판별나면 ,바로 조회 가능
 
-        Member member = memberRepository.findByKakaoId(kakaoId);
+        Member member = memberRepository.findByKakaoId(kakaoId); // 어차피 kakaoId 자체는 유효성 검사를 마친거나 다름 없으니 바로 사용가능
         checkMemberStatus(member);    /** 방에 참여하려는 사용자가 혹시 1차 2차 인증 과정을 모두 거치지는 않았는지 */
         checkBelongAnotherRoom(member);/** 혹시 이미 이방 or 다른방에 참여하고 있는 사용자는 아닌가 */
-        /** matching.Y 된 방은 못들어가게 validaion , 성별도 같이 확인 */
+        checkMatchingYnAtEnter(room);  /** matching.Y 된 방은 못들어가게 validaion , 성별도 같이 확인 */
+        checkGender(room, member);
+        checkNumOfRoomMemberAtEnter(room); /** 방 인원은 6명 인지 check  */
+
 
         //2. kakaoId를 가지고 참여하고자 하는 그 Member를 조회하고
         // roomCode를 가지고 참여할 Room을 조회하여
         // 이들을 가지고 RoomMember를 생성하여 save 하므로써
         // 해당 Member를 해당 Room에 속하게 해줌
-        Room room = roomRepository.findByRoomCodeAndStatus(roomCode, Status.ACTIVE);
-
         belongToRoom(member, room);
 
         //3. 현재 방에 속한 모든 RoomMember의 정보를 DTO로 치환하여 반환
-        return getAllRoomMembers(room);
+        List<MemberDto> allRoomMembers = getAllRoomMembers(room);
+        return ParticipateDto.builder()
+                .memberDtoList(allRoomMembers)
+                .roomIdx(room.getIdx())
+                .build();
     }
 
 
@@ -218,30 +245,39 @@ public class RoomService {
         );
     }
 
-    private List<MemberDto>  deleteRoomMemberAtOwner(Member member){
+    private void checkMatchingYnAtExit(Room room){
+        if(room.getMatchingYN() == Y){
+            throw new BaseException(BaseResponseStatus.ALREADY_MATCHING_YN_Y, "방 나가기 시점 : 참여하려는 해당 방은 이미 매칭 준비를 완료하여 , 해당 방을 없애거나 or 해당방에서 나갈 수 없습니다.");
+        }
+    }
+
+    private ParticipateDto  deleteRoomMemberAtOwner(Member member){
         member.getRoom().getRoomMemberList().stream()
                 .forEach(rm -> roomMemberRepository.deleteByMemberIdx(rm.getMember().getIdx()));
 
         roomRepository.deleteByMemberIdx(member.getIdx());
 
-        return new ArrayList<>();
+        // 어차피 방장이 나가면 그 방 자체가 사라지니깐 , roomIdx 값도 -1 이라는 의미없는 Idx 값을 넣어주면 된다.
+        return ParticipateDto.builder().roomIdx(-1L).memberDtoList(new ArrayList<>()).build();
 
     }
 
-    private List<MemberDto>  deleteRoomMemberAtNotOwner(Member member){
+    private ParticipateDto  deleteRoomMemberAtNotOwner(Member member, Long roomIdx){
         roomMemberRepository.deleteByMemberIdx(member.getIdx());
-        return  getAllRoomMembers(member.getRoomMember().getRoom());
+        List<MemberDto> allRoomMembers = getAllRoomMembers(member.getRoomMember().getRoom());
+        return ParticipateDto.builder().roomIdx(roomIdx).memberDtoList(allRoomMembers).build();
 
     }
 
     @Transactional
-    public List<MemberDto> deleteRoomMember(Long kakaoId) {
+    public ParticipateDto deleteRoomMember(Long kakaoId) {
         //1. 방을 나가려는 그 Member를 조회하여
         Member member = memberRepository.findByKakaoId(kakaoId);
 
         //2. 유효성 검사 : 이 사람이 속한 방이 있는지
         checkMemberStatus(member);    /** 방에서 나가려는 사용자가 혹시 1차 2차 인증 과정을 모두 거치지는 않았는지 */
         checkAlreadyGoOut(member);    /** 방에서 나가려는 사용자가 이미 방에서 나갔는지 */
+        checkMatchingYnAtExit(member.getRoomMember().getRoom());
 
         //3. (위 검증을 모두 겨쳤다면) kakaoId를 통해 Member~RoomMember~Room을 모두 조회
         member = memberRepository.findWithRoom(kakaoId);
@@ -253,9 +289,68 @@ public class RoomService {
 
         //4_2. 일반 사용자면
         else{
-            return deleteRoomMemberAtNotOwner(member);
+            // 일단 방에서 나가기 전 (== 그 Member와 관련된 RoomMember를 지우기 전) 먼저 , RoomIdx값을 조회하고
+            Long roomIdx = member.getRoomMember().getRoom().getIdx();
+            return deleteRoomMemberAtNotOwner(member, roomIdx);
         }
 
+    }
+
+    /** ----------------------------------------------------------------------------------------------------*/
+
+    /** [방 매칭 준비 상태를 , 매칭 상태로 변경해주는 서비스] */
+    @Transactional
+    public ParticipateDto matching(Long kakaoId, Long roomIdx){
+
+        //0. 매칭 상태를 변경하려는 사용자가 그 방의 방장인지의 여부를 check
+        Member member = memberRepository.findByKakaoId(kakaoId);
+        checkOwner(member, roomIdx);
+
+        // 또한 그 방의 인원이 2명 이상 6명 이하인지 여부를 check
+        /** 어차피 위 로직을 통과했다는건 , 그 방에 방장이라는 의미이니깐 , Member는 OwnerMember이고 , 그 OwnerMember가 만든 방이 이 Room*/
+        member = memberRepository.findWithRoom(kakaoId);
+        Room room = roomRepository.findAtRoomIdx(roomIdx);
+        checkNumOfRoomMember(room);
+
+        // 또한 그 방의 매칭 준비 상태가 , 아직 준비상태가 아닌지를 check
+        checkMatchingStatus(room);
+
+        // 혹시나 싶지만 ,, 1,2,차 인증 과정을 모두 거쳤는지 check
+        checkMemberStatus(member);
+
+
+        //1. 그 방의 matchingYn 컬럼값을 Y로 변경
+        member.getRoom().setMatchingYN(MatchingYN.Y);
+
+        //2. ParticipateDto를 생성하여 반환
+        List<MemberDto> memberDtoList = getMembers(member.getRoom().getIdx());
+        return ParticipateDto.builder()
+                .memberDtoList(memberDtoList)
+                .roomIdx(roomIdx)
+                .build();
+    }
+
+    private void checkOwner(Member member, Long roomIdx){
+        if(member.getRoom() == null){
+            throw new BaseException(BaseResponseStatus.IS_NOT_OWNER,"매칭 준비 상태로 변경 시점 : 해당 사용자는 일반 사용자 입니다.");
+        }
+
+        if(member.getRoom().getIdx()!=roomIdx){
+            throw new BaseException(BaseResponseStatus.IS_NOT_OWNER, "매칭 준비 상태로 변경 시점 : 매칭 상태를 변경하려는 사용자가 그 방의 방장이 아닙니다.");
+        }
+    }
+
+    private void checkNumOfRoomMember(Room room){
+        int numOfRoomMember = room.getRoomMemberList().size();
+        if( !(numOfRoomMember>=2 && numOfRoomMember<=6) ){
+            throw new BaseException(BaseResponseStatus.NOT_SUITABLE_SIZE, "매칭 준비 상태로 변경 시점 : 매칭 상태로 변경되기 위해서는 , 방 인원이 2명에서 6명으로 제한되는데, 이를 만족하지 못하였습니다.");
+        }
+    }
+
+    private void checkMatchingStatus(Room room){
+        if(room.getMatchingYN()==Y){
+            throw new BaseException(BaseResponseStatus.ALREADY_MATCHING_YN_Y, "매칭 준비 상태로 변경 시점 : 이미 해당 방은 매칭 준비 상태입니다.");
+        }
     }
 
 }
