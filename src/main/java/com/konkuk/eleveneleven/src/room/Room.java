@@ -1,5 +1,7 @@
 package com.konkuk.eleveneleven.src.room;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.konkuk.eleveneleven.common.basic.BasicEntity;
 import com.konkuk.eleveneleven.common.enums.Gender;
 import com.konkuk.eleveneleven.common.enums.MatchingYN;
@@ -20,6 +22,7 @@ import java.util.List;
 @Setter
 @Table(name = "room")
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // protected 기본 생성자를 추가해줌 (JPA 규약 상 의무적으로 필요함)
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
 public class Room extends BasicEntity {
 
     @Id

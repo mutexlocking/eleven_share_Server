@@ -6,7 +6,9 @@ import com.konkuk.eleveneleven.src.room.dto.ParticipateDto;
 import com.konkuk.eleveneleven.src.room.dto.RoomDto;
 import com.konkuk.eleveneleven.src.room.dto.RoomMemberDto;
 import com.konkuk.eleveneleven.src.room.request.RoomCodeRequest;
+import com.konkuk.eleveneleven.src.room.service.RoomMatchingService;
 import com.konkuk.eleveneleven.src.room.service.RoomService;
+import com.konkuk.eleveneleven.src.room.vo.RandMatchResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,7 @@ import java.util.List;
 public class RoomController {
 
     private final RoomService roomService;
+    private final RoomMatchingService roomMatchingService;
 
     /** [방 생성 API] */
     @PostMapping("/room")
@@ -43,6 +46,12 @@ public class RoomController {
     @PatchMapping("/room/status/{roomIdx}")
     public BaseResponse<ParticipateDto> matchingRoom(@RequestAttribute Long kakaoId, @PathVariable Long roomIdx){
         return new BaseResponse<>(roomService.matching(kakaoId, roomIdx));
+
+    @GetMapping("/test/sch")
+    public BaseResponse<RandMatchResult> getTestScheduler() throws Exception {
+
+        return new BaseResponse<>(roomMatchingService.randMatchRoom());
+
     }
 }
 
