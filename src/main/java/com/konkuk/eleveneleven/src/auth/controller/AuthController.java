@@ -27,10 +27,10 @@ public class AuthController {
      * Response : 안드로이드에서 넘어가야할 화면
      * */
     @PostMapping("")
-    public BaseResponse<PostAuthResDto> postAuth(@RequestBody PostAuthReqDto postAuthReqDto){
+    public BaseResponse<PostAuthResDto> postAuth(@RequestAttribute Long kakaoId){
 
         return new BaseResponse<>(PostAuthResDto.builder()
-                .screen(authService.postAuth(postAuthReqDto.getKakaoId()))
+                .screen(authService.postAuth(kakaoId))
                 .build());
     }
 
@@ -38,9 +38,9 @@ public class AuthController {
      * Stauts -> ACTIVE
      * */
     @PostMapping("/meta")
-    public BaseResponse<String> postAuthMeta(@RequestBody PostAuthMetaReqDto postAuthMetaReqDto){
+    public BaseResponse<String> postAuthMeta(@RequestAttribute Long kakaoId, @RequestBody PostAuthMetaReqDto postAuthMetaReqDto){
 
-        authService.postAuthMeta(postAuthMetaReqDto);
+        authService.postAuthMeta(kakaoId,postAuthMetaReqDto);
 
         return new BaseResponse<>("데이터 저장에 성공했습니다.");
 
