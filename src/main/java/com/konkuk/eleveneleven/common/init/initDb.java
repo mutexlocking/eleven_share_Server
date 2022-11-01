@@ -1,6 +1,8 @@
 package com.konkuk.eleveneleven.common.init;
 
 import com.konkuk.eleveneleven.common.enums.Gender;
+import com.konkuk.eleveneleven.src.matched_room.MatchedRoom;
+import com.konkuk.eleveneleven.src.matched_room_member.MatchedRoomMember;
 import com.konkuk.eleveneleven.src.member.Member;
 import com.konkuk.eleveneleven.src.room.Room;
 import com.konkuk.eleveneleven.src.room_member.RoomMember;

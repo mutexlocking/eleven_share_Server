@@ -7,6 +7,7 @@ import com.konkuk.eleveneleven.src.room.vo.WaitingRoom;
 import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.config.BaseException;
 import com.konkuk.eleveneleven.config.BaseResponseStatus;
+import com.konkuk.eleveneleven.src.matched_room_member.repository.MatchedRoomMemberRepository;
 import com.konkuk.eleveneleven.src.member.Member;
 import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
 import com.konkuk.eleveneleven.src.room.Room;
@@ -35,10 +36,11 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class RoomService {
 
-    private final EntityManager em;
+
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
     private final RoomMemberRepository roomMemberRepository;
+    private final MatchedRoomMemberRepository matchedRoomMemberRepository;
 
     private RoomDto saveRoom(Member ownerMember){
         //1. 인증코드 생성
@@ -92,10 +94,10 @@ public class RoomService {
         //0. kakaoId로 방장인 Member 조회 (kakaoId에 대한 유효성 검사는 끝난 상태 -> 하지만 모든 인증을 거쳐 ACTIVE 상태가 되었는지는 비확인)
         Member ownerMember = memberRepository.findByKakaoId(kakaoId);
 
-        //1. 그 방을 만들려는 Member가 , 1차 2차 인증과정을 모두 마쳐서 상태가 status 가 되었는지를 check
-        checkMemberStatus(ownerMember);
         //1_2. 그리고 이미 이 사람이 특정 방에 속해있는지 검사 -> 참여자로든 or 방장으로든 어떤 방에 속해있다면 , 새로운 방을 만들 수 없음
         checkBelongAnotherRoom(ownerMember);
+        //1_3. 또한 해당 사용자가 이미 매칭된 방에 속해있는지 검사 -> 매칭된 방에 속해있다면 , 그 방에서 나오기 전까진 일반 방을 만들 수 없음
+        checkBelongToMatchedRoom(ownerMember);
 
         //2. Room Entity 생성하여 save
         RoomDto roomDto = saveRoom(ownerMember);
@@ -150,6 +152,12 @@ public class RoomService {
         }
     }
 
+    private void checkBelongToMatchedRoom(Member member){
+        if(matchedRoomMemberRepository.existsByMemberIdxAndStatus(member.getIdx(), Status.ACTIVE)){
+            throw new BaseException(BaseResponseStatus.BELONG_TO_MATCHED_ROOM, "방생성 or 참여시 발생 : 방을 생성 또는 참여하려는 사용자가, 아직 매칭된 방에서 나오지 않은 상태이기 때문에, 다른 Room을 생성하거나 참여할 수 없습니다.");
+        }
+    }
+
     private void checkMatchingYnAtEnter(Room room){
         if(room.getMatchingYN() == Y){
             throw new BaseException(BaseResponseStatus.ALREADY_MATCHING_YN_Y, "방 참여 시점 : 참여하려는 해당 방은 이미 매칭 준비를 완료하여 , 다른 사용자가 참여할 수 없습니다.");
@@ -198,11 +206,11 @@ public class RoomService {
         Room room = roomRepository.findByRoomCodeAndStatus(roomCode, Status.ACTIVE); // 위 테스트에서 유효하다고 판별나면 ,바로 조회 가능
 
         Member member = memberRepository.findByKakaoId(kakaoId); // 어차피 kakaoId 자체는 유효성 검사를 마친거나 다름 없으니 바로 사용가능
-        checkMemberStatus(member);    /** 방에 참여하려는 사용자가 혹시 1차 2차 인증 과정을 모두 거치지는 않았는지 */
         checkBelongAnotherRoom(member);/** 혹시 이미 이방 or 다른방에 참여하고 있는 사용자는 아닌가 */
-        checkMatchingYnAtEnter(room);  /** matching.Y 된 방은 못들어가게 validaion , 성별도 같이 확인 */
-        checkGender(room, member);
+        checkMatchingYnAtEnter(room);  /** matching.Y 된 방은 못들어가게 validaion , */
+        checkGender(room, member);    /**  성별도 같이 확인 */
         checkNumOfRoomMemberAtEnter(room); /** 방 인원은 6명 인지 check  */
+        checkBelongToMatchedRoom(member); /** 참여하려는 사용자가 , 아직 매칭된 방에 속해있는지 확인*/
 
 
         //2. kakaoId를 가지고 참여하고자 하는 그 Member를 조회하고
@@ -275,9 +283,9 @@ public class RoomService {
         Member member = memberRepository.findByKakaoId(kakaoId);
 
         //2. 유효성 검사 : 이 사람이 속한 방이 있는지
-        checkMemberStatus(member);    /** 방에서 나가려는 사용자가 혹시 1차 2차 인증 과정을 모두 거치지는 않았는지 */
         checkAlreadyGoOut(member);    /** 방에서 나가려는 사용자가 이미 방에서 나갔는지 */
-        checkMatchingYnAtExit(member.getRoomMember().getRoom());
+        checkMatchingYnAtExit(member.getRoomMember().getRoom()); /** 이미 매칭 준비된 상태면 , 그 방에서 나갈 수 없다. */
+
 
         //3. (위 검증을 모두 겨쳤다면) kakaoId를 통해 Member~RoomMember~Room을 모두 조회
         member = memberRepository.findWithRoom(kakaoId);
@@ -306,17 +314,13 @@ public class RoomService {
         Member member = memberRepository.findByKakaoId(kakaoId);
         checkOwner(member, roomIdx);
 
-        // 또한 그 방의 인원이 2명 이상 6명 이하인지 여부를 check
         /** 어차피 위 로직을 통과했다는건 , 그 방에 방장이라는 의미이니깐 , Member는 OwnerMember이고 , 그 OwnerMember가 만든 방이 이 Room*/
         member = memberRepository.findWithRoom(kakaoId);
         Room room = roomRepository.findAtRoomIdx(roomIdx);
-        checkNumOfRoomMember(room);
+
 
         // 또한 그 방의 매칭 준비 상태가 , 아직 준비상태가 아닌지를 check
         checkMatchingStatus(room);
-
-        // 혹시나 싶지만 ,, 1,2,차 인증 과정을 모두 거쳤는지 check
-        checkMemberStatus(member);
 
 
         //1. 그 방의 matchingYn 컬럼값을 Y로 변경
@@ -337,13 +341,6 @@ public class RoomService {
 
         if(member.getRoom().getIdx()!=roomIdx){
             throw new BaseException(BaseResponseStatus.IS_NOT_OWNER, "매칭 준비 상태로 변경 시점 : 매칭 상태를 변경하려는 사용자가 그 방의 방장이 아닙니다.");
-        }
-    }
-
-    private void checkNumOfRoomMember(Room room){
-        int numOfRoomMember = room.getRoomMemberList().size();
-        if( !(numOfRoomMember>=2 && numOfRoomMember<=6) ){
-            throw new BaseException(BaseResponseStatus.NOT_SUITABLE_SIZE, "매칭 준비 상태로 변경 시점 : 매칭 상태로 변경되기 위해서는 , 방 인원이 2명에서 6명으로 제한되는데, 이를 만족하지 못하였습니다.");
         }
     }
 

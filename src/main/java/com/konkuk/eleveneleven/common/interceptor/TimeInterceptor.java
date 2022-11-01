@@ -26,10 +26,6 @@ public class TimeInterceptor implements HandlerInterceptor{
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        /** 헤더에 isTest 값이 true 이면 인터셉터 로직을 수행하지 않고 바로 넘어가도록 */
-        if(Boolean.parseBoolean(request.getHeader("isTest"))){
-            return true;
-        }
 
         /** 현재 시간을 조회하여 , 시간이 23:12 ~ 11:10 이면 -> 방생성 / 방 참여 / 방 나가기 API를 호출하지 못하도록 제어 */
         LocalTime now = LocalTime.now();
