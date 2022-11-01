@@ -1,6 +1,9 @@
 package com.konkuk.eleveneleven.src.room.service;
 
 import com.konkuk.eleveneleven.common.enums.MatchingYN;
+import com.konkuk.eleveneleven.src.chat.vo.ChatRoom;
+import com.konkuk.eleveneleven.src.room.repository.RoomRepository;
+import com.konkuk.eleveneleven.src.room.vo.WaitingRoom;
 import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.config.BaseException;
 import com.konkuk.eleveneleven.config.BaseResponseStatus;
@@ -25,6 +28,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.konkuk.eleveneleven.common.enums.MatchingYN.Y;
+import javax.annotation.PostConstruct;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor

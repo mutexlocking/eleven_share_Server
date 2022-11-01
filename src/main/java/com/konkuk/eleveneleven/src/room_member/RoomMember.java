@@ -1,5 +1,7 @@
 package com.konkuk.eleveneleven.src.room_member;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.konkuk.eleveneleven.common.basic.BasicEntity;
 import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.src.member.Member;
@@ -16,6 +18,7 @@ import javax.persistence.*;
 @Setter
 @Table(name = "room_member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // protected 기본 생성자를 추가해줌 (JPA 규약 상 의무적으로 필요함)
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
 public class RoomMember extends BasicEntity {
 
     @Id
@@ -54,6 +57,10 @@ public class RoomMember extends BasicEntity {
     /** [변경메서드] */
     public void update(Status status){
         this.setStatus(status);
+    }
+
+    public void updateRoom(Room room){
+        this.setRoom(room);
     }
 
 }

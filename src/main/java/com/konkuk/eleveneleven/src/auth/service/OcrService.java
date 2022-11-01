@@ -11,10 +11,7 @@ import com.google.cloud.vision.v1.ImageAnnotatorClient;
 import com.google.protobuf.ByteString;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +27,13 @@ import com.konkuk.eleveneleven.src.school.School;
 import com.konkuk.eleveneleven.src.school.repository.SchoolRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+
+import static com.google.common.io.Files.getFileExtension;
 
 @Slf4j
 @Service
@@ -49,11 +49,22 @@ public class OcrService {
         String major = "";
         String student_num = "";
 
+        System.out.println("idCardImg.getInputStream().toString() = " + idCardImg.getInputStream());
+        System.out.println("idCardImg.getOriginalFilename() = " + idCardImg.getOriginalFilename());
+        System.out.println("idCardImg = " + idCardImg);
+        System.out.println("name = " + name);
+        System.out.println("univ = " + univ);
+        System.out.println("univ = " + univ.replaceAll("\n", ""));
+        System.out.println("univ.equal  = " + univ.replaceAll("\n", "").equals("건국대학교"));
+        
+        
         /** 1. 학교 정보를 받음 */
         // DB에 저장되어 있는 각 학교별 학번 정규식 가져옴
         log.info("univ : " + univ);
         List<School> schoolInfo = schoolRepository.findByNameAndStatus(univ.replaceAll("\n", ""), Status.ACTIVE);
-
+        System.out.println("schoolInfo = " + schoolInfo.get(0).getName());
+        System.out.println("schoolInfo.isEmpty() = " + schoolInfo.isEmpty());
+        
         /** 1_ex.1) DB에 저장되어있는 학교가 아닐 때 */
         if(schoolInfo.isEmpty()){
             log.info("서비스에서 제공하는 학교가 아닙니다.");
@@ -129,7 +140,10 @@ public class OcrService {
         /** 5. 학생증 사진을 S3에 저장 후 URL 화 */
         // 1. 파일 나눠서 저장
         // 2. 파일 이름을 지정
-        String photoUrl = awsS3Service.uploadFile(idCardImg);
+
+        String fileName = (univ+"_"+name+"("+student_num+")"+".").concat(getFileExtension(idCardImg.getOriginalFilename()));
+
+        String photoUrl = awsS3Service.uploadFile(idCardImg,fileName,univ);
         log.info("S3 photoURL : " + photoUrl);
 
         return OcrProcessRes.builder()
