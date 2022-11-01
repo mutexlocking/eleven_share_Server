@@ -1,6 +1,8 @@
 package com.konkuk.eleveneleven.common.init;
 
 import com.konkuk.eleveneleven.common.enums.Gender;
+import com.konkuk.eleveneleven.src.matched_room.MatchedRoom;
+import com.konkuk.eleveneleven.src.matched_room_member.MatchedRoomMember;
 import com.konkuk.eleveneleven.src.member.Member;
 import com.konkuk.eleveneleven.src.room.Room;
 import com.konkuk.eleveneleven.src.room_member.RoomMember;
@@ -51,6 +53,12 @@ public class initDb {
 //            RoomMember roomMember31 = new RoomMember(room1, member3);
 //            em.persist(roomMember11); em.persist(roomMember21); em.persist(roomMember31);
 //            em.flush(); em.clear();
+
+            MatchedRoom matchedRoom = new MatchedRoom(member1);
+            MatchedRoomMember matchedRoomMember1 = new MatchedRoomMember(matchedRoom, member1);
+            MatchedRoomMember matchedRoomMember2 = new MatchedRoomMember(matchedRoom, member2);
+
+            em.persist(matchedRoom); em.persist(matchedRoomMember1); em.persist(matchedRoomMember2);
 
 
             School school1  = new School("가톨릭대학교", "catholic.ac.kr","^20[0-5]\\d{6}$","2-3");

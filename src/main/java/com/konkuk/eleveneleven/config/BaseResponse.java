@@ -36,6 +36,7 @@ public class BaseResponse<T> {
         this.code = status.getCode();
     }
 
+
     public BaseResponse(com.konkuk.eleveneleven.config.BaseResponseStatus status, T bindResult){
         this.isSuccess = status.isSuccess();
         this.message = status.getMessage();
