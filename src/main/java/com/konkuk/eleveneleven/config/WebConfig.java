@@ -27,8 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(beforeAuthInterceptor)
                 .order(1)
-                .addPathPatterns("/auth/email", "/auth/meta", "/ocr", "/auth/login")
-                .excludePathPatterns("/css/**", "/*.ico", "/error", "/auth", "/room/**", "/test/**", "/matched/room/url/**");
+                .addPathPatterns("/auth/email", "/auth/meta", "/auth/login")
+                .excludePathPatterns("/css/**", "/*.ico", "/error", "/auth", "/room/**", "/test/**", "/matched/room/url/**", "/ocr");
 
         registry.addInterceptor(authInterceptor)
                 .order(2)
@@ -38,6 +38,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(timeInterceptor)
                 .order(3)
                 .addPathPatterns("/room", "/room/member")
-                .excludePathPatterns("/css/**", "/*.ico", "/error", "/auth/**", "/ocr", "/test/**" );
+                .excludePathPatterns("/css/**", "/*.ico", "/error", "/auth/**", "/ocr", "/test/**", "/matched/**");
     }
 }
