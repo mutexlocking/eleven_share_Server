@@ -1,5 +1,6 @@
 package com.konkuk.eleveneleven.src.matched_room.service;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.config.BaseException;
 import com.konkuk.eleveneleven.config.BaseResponseStatus;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 
 @Service
@@ -36,8 +38,8 @@ public class MatchedRoomService {
         MatchedRoom matchedRoom = getMatchedRoom(matchedRoomIdx);
         checkOwner(matchedRoom, kakaoId);
 
-//        //1_2. 또한 아직 그 MatchedRoom의 url이 설정되지 않았음을 검사
-//        checkUrlAlready(matchedRoom);
+        //1_2. 또한 아직 그 MatchedRoom의 url이 설정되지 않았음을 검사
+        checkUrlAlready(matchedRoom);
 
         checkUrlPattern(url);
 
@@ -70,6 +72,12 @@ public class MatchedRoomService {
 
         if( !url.contains("open.kakao.com")){
             throw new BaseException(BaseResponseStatus.IS_NOT_OPEN_URL, "오픈채팅 url 공유 시점 : 오픈채팅 url이 아님");
+        }
+    }
+
+    private void checkUrlAlready(MatchedRoom matchedRoom){
+        if(Optional.ofNullable(matchedRoom.getUrl()).isPresent()){
+            throw new BaseException(BaseResponseStatus.ALREADY_SETTING_URL, "오픈채팅 url 공유 시점 : 오픈채팅 url이 이미 공유되어 있습니다.");
         }
     }
 
