@@ -54,6 +54,12 @@ public class initDb {
 //            em.persist(roomMember11); em.persist(roomMember21); em.persist(roomMember31);
 //            em.flush(); em.clear();
 
+            MatchedRoom matchedRoom = new MatchedRoom(member1);
+            MatchedRoomMember matchedRoomMember1 = new MatchedRoomMember(matchedRoom, member1);
+            MatchedRoomMember matchedRoomMember2 = new MatchedRoomMember(matchedRoom, member2);
+            em.persist(matchedRoom);
+            em.persist(matchedRoomMember1); em.persist(matchedRoomMember2);
+
 
             School school1  = new School("가톨릭대학교", "catholic.ac.kr","^20[0-5]\\d{6}$","2-3");
             School school2  = new School("강서대학교", "gangseo.ac.kr",null,null);
