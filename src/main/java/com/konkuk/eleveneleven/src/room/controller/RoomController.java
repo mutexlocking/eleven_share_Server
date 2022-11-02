@@ -48,6 +48,8 @@ public class RoomController {
         return new BaseResponse<>(roomService.matching(kakaoId, roomIdx));
     }
 
+    }
+    
     @GetMapping("/test/sch")
     public BaseResponse<RandMatchResult> getTestScheduler() throws Exception {
 

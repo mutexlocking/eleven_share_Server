@@ -4,18 +4,14 @@ package com.konkuk.eleveneleven.src.auth.service;
 import com.google.cloud.vision.v1.AnnotateImageRequest;
 import com.google.cloud.vision.v1.AnnotateImageResponse;
 import com.google.cloud.vision.v1.BatchAnnotateImagesResponse;
-import com.google.cloud.vision.v1.EntityAnnotation;
 import com.google.cloud.vision.v1.Feature;
 import com.google.cloud.vision.v1.Image;
 import com.google.cloud.vision.v1.ImageAnnotatorClient;
 import com.google.protobuf.ByteString;
 
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,11 +23,8 @@ import com.konkuk.eleveneleven.src.school.School;
 import com.konkuk.eleveneleven.src.school.repository.SchoolRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.imageio.ImageIO;
 
 import static com.google.common.io.Files.getFileExtension;
 
@@ -43,20 +36,10 @@ public class OcrService {
     private final AwsS3Service awsS3Service;
     private final SchoolRepository schoolRepository;
 
-
     public OcrProcessRes postOcrProcessImage(MultipartFile idCardImg, String name, String univ) throws BaseException, IOException {
 
         String major = "";
         String student_num = "";
-
-        System.out.println("idCardImg.getInputStream().toString() = " + idCardImg.getInputStream());
-        System.out.println("idCardImg.getOriginalFilename() = " + idCardImg.getOriginalFilename());
-        System.out.println("idCardImg = " + idCardImg);
-        System.out.println("name = " + name);
-        System.out.println("univ = " + univ);
-        System.out.println("univ = " + univ.replaceAll("\n", ""));
-        System.out.println("univ.equal  = " + univ.replaceAll("\n", "").equals("건국대학교"));
-        
         
         /** 1. 학교 정보를 받음 */
         // DB에 저장되어 있는 각 학교별 학번 정규식 가져옴
