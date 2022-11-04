@@ -69,7 +69,7 @@ public class Member extends BasicEntity {
         this.studentId = studentId;
         this.schoolEmail = schoolEmail;
         this.major = major;
-        this.setStatus(Status.ACTIVE);
+        this.setStatus(Status.ONGOING);
     }
 
 
