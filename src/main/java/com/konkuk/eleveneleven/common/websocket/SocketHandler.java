@@ -16,10 +16,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.sockjs.client.WebSocketClientSockJsSession;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -111,6 +108,27 @@ public class SocketHandler extends TextWebSocketHandler {
                 //(3) 마지막으로 Member에 대한 sessionKey를 이용해서 -> 그 session을 강제로 close()
                 sessionMap.get(session.getId()).close(CloseStatus.NORMAL);
             }
+        } else if(role.equals("READY")){
+            if(isOwner){
+
+                //(1) 연결되어 있는 모든 Member들에게 BroadCasting 해야 함
+                sendAllReady(roomIdx, getReadyJson());
+
+                //(2) 그리고 연결된 모든 세션을 끊어줌
+
+                //(2_1) 방에대한 전체 sessionId를 이용해서 , 그 방에 저장된 실제 들을 모두 session를 close
+                keyMap.get(roomIdx).stream()
+                        .forEach(si -> {
+                            try {
+                                sessionMap.get(si).close(CloseStatus.NORMAL);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+
+                //(2_2) 전체 방에대한 keyMap의 SessionKeyList를 삭제
+                keyMap.remove(roomIdx);
+            }
         }
 
     }
@@ -145,6 +163,24 @@ public class SocketHandler extends TextWebSocketHandler {
         return memberDtoList.stream()
                 .map(m -> new JSONObject(m))
                 .collect(Collectors.toList());
+    }
+
+    private JSONObject getReadyJson(){
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("isReady", true);
+        return new JSONObject(map);
+    }
+
+    private void sendAllReady(Long roomIdx, JSONObject readyMesssage){
+        keyMap.get(roomIdx).stream()
+                .map(sk -> sessionMap.get(sk))
+                .forEach(s -> {
+                    try {
+                        s.sendMessage(new TextMessage(readyMesssage.toString()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     private void sendAll(Long roomIdx, List<JSONObject> memberDtoList){
