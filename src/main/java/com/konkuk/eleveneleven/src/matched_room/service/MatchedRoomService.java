@@ -64,9 +64,9 @@ public class MatchedRoomService {
 
     /** [Room의 정보들을 Matched_Room로 이전] */
     public void migrateRoomToMatchedRoom(){
-        List<Room> allRoomInDB = roomRepository.findAll();
+        List<Room> allStatusRoomInDB = roomRepository.findAllByStatus(Status.ACTIVE);
 
-        for (Room room : allRoomInDB) {
+        for (Room room : allStatusRoomInDB) {
             MatchedRoom matchedRoom = new MatchedRoom(room.getOwnerMember());
             matchedRoomRepository.save(matchedRoom);
 
