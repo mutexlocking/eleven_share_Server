@@ -31,12 +31,4 @@ public class MatchedRoomController {
         return new BaseResponse<>(matchedRoomService.getUrl(kakaoId, matchedRoomIdx));
     }
 
-    @GetMapping("/test/migrate")
-    public void getTestScheduler() throws Exception {
-
-        matchedRoomService.migrateRoomToMatchedRoom();
-
-    }
-
-
 }

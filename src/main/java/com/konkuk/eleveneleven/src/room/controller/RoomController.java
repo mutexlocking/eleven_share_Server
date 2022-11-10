@@ -47,13 +47,7 @@ public class RoomController {
     public BaseResponse<ParticipateDto> matchingRoom(@RequestAttribute Long kakaoId, @PathVariable Long roomIdx) {
         return new BaseResponse<>(roomService.matching(kakaoId, roomIdx));
     }
-    
-    @GetMapping("/test/sch")
-    public BaseResponse<RandMatchResult> getTestScheduler() throws Exception {
 
-        return new BaseResponse<>(roomMatchingService.randMatchRoom());
-
-    }
 }
 
 
