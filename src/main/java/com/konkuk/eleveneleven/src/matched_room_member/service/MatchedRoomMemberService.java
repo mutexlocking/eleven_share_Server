@@ -2,6 +2,8 @@ package com.konkuk.eleveneleven.src.matched_room_member.service;
 
 import com.konkuk.eleveneleven.common.enums.Gender;
 import com.konkuk.eleveneleven.common.enums.Status;
+import com.konkuk.eleveneleven.config.BaseException;
+import com.konkuk.eleveneleven.config.BaseResponseStatus;
 import com.konkuk.eleveneleven.src.matched_room.MatchedRoom;
 import com.konkuk.eleveneleven.src.matched_room_member.MatchedRoomMember;
 import com.konkuk.eleveneleven.src.matched_room_member.dto.GetMatchedRoomMemberRes;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,7 +42,17 @@ public class MatchedRoomMemberService {
         return memberRepository.findByKakaoId(kakaoId).getIdx();
     }
     private MatchedRoom getMatchedRoomIdx(Long memberIdx){
-        return matchedRoomMemberRepository.findByMemberIdxAndStatus(memberIdx, Status.ACTIVE).get().getMatchedRoom();
+        Optional<MatchedRoomMember> byMemberIdxAndStatus = matchedRoomMemberRepository.findByMemberIdxAndStatus(memberIdx, Status.ACTIVE);
+
+        matchFailValidation(byMemberIdxAndStatus);
+
+        return byMemberIdxAndStatus.get().getMatchedRoom();
+    }
+
+    private void matchFailValidation(Optional<MatchedRoomMember> byMemberIdxAndStatus){
+        if(byMemberIdxAndStatus.isEmpty()) {
+            throw new BaseException(BaseResponseStatus.FAIL_TO_MATCHING);
+        }
     }
 
     private Gender getMemberGender(Long kakakId){
