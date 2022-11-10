@@ -237,6 +237,13 @@ public class RoomService {
         roomMemberRepository.deleteAll();
     }
 
+    /** DB상 Room이 비어있는지 확인 */
+    public void checkIsRoomEmpty(){
+        if (roomRepository.findAll().size() == 0) {
+            throw new BaseException(BaseResponseStatus.ROOM_EMPTY_IN_DB);
+        }
+    }
+
 
 
     private void checkDeleteRoomMember(Member member){

@@ -97,7 +97,9 @@ public enum BaseResponseStatus {
     MODIFY_OBJECT_FAIL(false, 4004, "Request 객체 변환에 실패하였습니다."),
     FAIL_WEB_SOCKET_CONNECTION(false, 2005, "웹소켓 연결에 실패하였습니다."),
     S3UPLOAD_ERROR(false, 4080, "파일 업로드에 실패하였습니다."),
-    DETECT_TEXT_FAIL(false, 4081, "OCR 파일 분석에 실패하였습니다.");
+    DETECT_TEXT_FAIL(false, 4081, "OCR 파일 분석에 실패하였습니다."),
+    ROOM_EMPTY_IN_DB(false, 4201, "DB에 Room이 하나도 없습니다."),
+    ROOM_MEMBER_EMPTY_IN_DB(false, 4202, "DB에 RoomMember가 하나도 없습니다.");
 
     private final boolean isSuccess;
     private final int code;
