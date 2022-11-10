@@ -7,22 +7,30 @@ import com.konkuk.eleveneleven.config.BaseResponseStatus;
 import com.konkuk.eleveneleven.src.matched_room.MatchedRoom;
 import com.konkuk.eleveneleven.src.matched_room.dto.UrlDto;
 import com.konkuk.eleveneleven.src.matched_room.repository.MatchedRoomRepository;
+import com.konkuk.eleveneleven.src.matched_room_member.MatchedRoomMember;
 import com.konkuk.eleveneleven.src.matched_room_member.repository.MatchedRoomMemberRepository;
 import com.konkuk.eleveneleven.src.member.Member;
 import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
+import com.konkuk.eleveneleven.src.room.Room;
+import com.konkuk.eleveneleven.src.room.repository.RoomRepository;
+import com.konkuk.eleveneleven.src.room_member.RoomMember;
+import com.konkuk.eleveneleven.src.room_member.repository.RoomMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.html.Option;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+//@Transactional(readOnly = true)
 public class MatchedRoomService {
 
 
+    private final RoomRepository roomRepository;
+    private final RoomMemberRepository roomMemberRepository;
     private final MemberRepository memberRepository;
     private final MatchedRoomRepository matchedRoomRepository;
     private final MatchedRoomMemberRepository matchedRoomMemberRepository;
@@ -52,6 +60,27 @@ public class MatchedRoomService {
                 .matchedRoomIdx(matchedRoom.getIdx())
                 .build();
 
+    }
+
+    /** [Room의 정보들을 Matched_Room로 이전] */
+    public void migrateRoomToMatchedRoom(){
+        List<Room> allRoomInDB = roomRepository.findAll();
+
+        for (Room room : allRoomInDB) {
+            MatchedRoom matchedRoom = new MatchedRoom(room.getOwnerMember());
+            matchedRoomRepository.save(matchedRoom);
+
+            migrateRoomMemberToMatchedRoomMember(room.getIdx(),matchedRoom);
+        }
+    }
+
+    /** [Room_Member의 정보들을 Matched_Room_Member로 이전] */
+    private void migrateRoomMemberToMatchedRoomMember(Long roomIdx, MatchedRoom matchedRoom){
+        List<RoomMember> allRoomMemberInRoom = roomMemberRepository.findByRoomIdx(roomIdx);
+
+        for (RoomMember roomMember : allRoomMemberInRoom){
+            matchedRoomMemberRepository.save(new MatchedRoomMember(matchedRoom,roomMember.getMember()));
+        }
     }
 
     private MatchedRoom getMatchedRoom(Long matchedRoomIdx){

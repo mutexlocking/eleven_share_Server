@@ -4,6 +4,7 @@ import com.konkuk.eleveneleven.config.BaseResponse;
 import com.konkuk.eleveneleven.src.matched_room.dto.UrlDto;
 import com.konkuk.eleveneleven.src.matched_room.dto.UrlRequest;
 import com.konkuk.eleveneleven.src.matched_room.service.MatchedRoomService;
+import com.konkuk.eleveneleven.src.room.vo.RandMatchResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,4 +30,13 @@ public class MatchedRoomController {
                                        @PathVariable Long matchedRoomIdx){
         return new BaseResponse<>(matchedRoomService.getUrl(kakaoId, matchedRoomIdx));
     }
+
+    @GetMapping("/test/migrate")
+    public void getTestScheduler() throws Exception {
+
+        matchedRoomService.migrateRoomToMatchedRoom();
+
+    }
+
+
 }

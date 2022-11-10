@@ -37,8 +37,6 @@ public class MatchedRoom extends BasicEntity {
     @OneToMany(mappedBy = "matchedRoom")
     private List<MatchedRoomMember> matchedRoomMemberList = new ArrayList<>();
 
-    @Column(name = "chat_url")
-    private String chatUrl;
 
     // 연관관계 편의 메서드
     public void setOwnerMember(Member ownerMember){

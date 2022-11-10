@@ -36,4 +36,7 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
     @Modifying
     @Query("delete from RoomMember rm where rm.member.idx=:memberIdx")
     void deleteByMemberIdx(@Param("memberIdx") Long memberIdx);
+
+    List<RoomMember> findByRoomIdx(Long roomIdx);
+
 }
