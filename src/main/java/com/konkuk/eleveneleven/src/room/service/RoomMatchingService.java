@@ -18,9 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
-@EnableScheduling
 @RequiredArgsConstructor
-@Transactional(readOnly = false)
 public class RoomMatchingService {
 
     /**
@@ -46,15 +44,6 @@ public class RoomMatchingService {
     private final RoomRepository roomRepository;
     private final RoomMemberRepository roomMemberRepository;
 
-    /** 매일 23시에 Scheduler를 동작하여 matching 진행 */
-    @Transactional
-    @Scheduled(cron = "0 11 23 * * ?")
-    public void matchRoom() {
-
-        randMatchRoom();
-
-    }
-
     /** [ 방 무작위 매칭 ] */
     public RandMatchResult randMatchRoom() {
         // 1. MALE , FEMALE 을 각각 List로 뽑아냄
@@ -77,20 +66,16 @@ public class RoomMatchingService {
                 .forEach(i -> roomMemberRepository.updateRoomMemberRoom(maleRoomList.get(i),femaleRoomList.get(i)));
 
         // 2. 매칭된 FEMALE ROOM 삭제
-//        deleteNotMatchRoom(femaleRoomList);
+        deleteNotMatchRoom(femaleRoomList);
     }
 
-    /** [ FEMALE RoomMember의 Room을 남자 Room으로 변경 ] */
-    public void updateRoomMember(Long femaleRoomIdx, Room maleRoom){
-        RoomMember roomMember = roomMemberRepository.findByIdx(femaleRoomIdx);
-        roomMember.updateRoom(maleRoom);
-    }
 
     /** [ 매칭 안된 방들 삭제 ] */
     public void deleteNotMatchRoom(List<Room> deleteRoomList){
-        roomRepository.deleteAllById(deleteRoomList.stream()
-                .map(drl -> drl.getIdx())
-                .collect(Collectors.toList()));
+        for(Room deleteRoom : deleteRoomList){
+            deleteRoom.setStatus(Status.INACTIVE);
+            roomRepository.save(deleteRoom);
+        }
     }
 
     /** [ 리스트 요소를 랜덤 추출 ] */

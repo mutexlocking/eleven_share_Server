@@ -33,7 +33,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional(readOnly = false)
 public class RoomService {
 
 
@@ -225,6 +225,16 @@ public class RoomService {
                 .memberDtoList(allRoomMembers)
                 .roomIdx(room.getIdx())
                 .build();
+    }
+
+    /** DB상 모든 방을 없앰 */
+    public void deleteAllRoomInDB(){
+        roomRepository.deleteAll();
+    }
+
+    /** DB상 모든 RoomMember를 없앰 */
+    public void deleteAllRoomMemberInDB(){
+        roomMemberRepository.deleteAll();
     }
 
 

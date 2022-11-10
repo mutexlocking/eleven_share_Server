@@ -80,6 +80,7 @@ public enum BaseResponseStatus {
     IS_NOT_BELEONG_TO_MATCHED_ROOM(false, 2465, "이 MatchedRoom에 속한 사용자가 아닙니다."),
     IS_NOT_SETTING_URL(false, 2466, "이 MatchedRoom에는 아직 오픈채팅 url이 설정되어 있지 않습니다."),
     IS_NOT_OPEN_URL(false, 2467, "이 url은 오픈채팅 url이 아닙니다."),
+    FAIL_TO_MATCHING(false, 3501, "매칭에 실패한 유저입니다."),
 
     /**
      * 3000 : Response 오류

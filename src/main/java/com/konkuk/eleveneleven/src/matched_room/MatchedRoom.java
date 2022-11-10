@@ -37,6 +37,7 @@ public class MatchedRoom extends BasicEntity {
     @OneToMany(mappedBy = "matchedRoom")
     private List<MatchedRoomMember> matchedRoomMemberList = new ArrayList<>();
 
+
     // 연관관계 편의 메서드
     public void setOwnerMember(Member ownerMember){
         this.ownerMember = ownerMember;
