@@ -44,10 +44,11 @@ public class RoomController {
 
     /** [방 배칭 신청 API] : 오직 방장에 한하여 , 매칭 신청을 할 수 있도록 */
     @PatchMapping("/room/status/{roomIdx}")
-    public BaseResponse<ParticipateDto> matchingRoom(@RequestAttribute Long kakaoId, @PathVariable Long roomIdx){
+    public BaseResponse<ParticipateDto> matchingRoom(@RequestAttribute Long kakaoId, @PathVariable Long roomIdx) {
         return new BaseResponse<>(roomService.matching(kakaoId, roomIdx));
-
     }
+
+
     
     @GetMapping("/test/sch")
     public BaseResponse<RandMatchResult> getTestScheduler() throws Exception {

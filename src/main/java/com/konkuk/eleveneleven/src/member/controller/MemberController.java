@@ -1,5 +1,6 @@
 package com.konkuk.eleveneleven.src.member.controller;
 
+import com.konkuk.eleveneleven.common.encryption.AES128;
 import com.konkuk.eleveneleven.common.jwt.JwtUtil;
 import com.konkuk.eleveneleven.config.BaseResponse;
 import com.konkuk.eleveneleven.src.member.dto.EmailDto;
@@ -13,6 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -20,13 +24,20 @@ public class MemberController {
 
     private final MemberService memberService;
     private final JwtUtil jwtUtil;
+    private final AES128 aes128;
+
+    @GetMapping("/aes")
+    public String aes(@RequestParam String str){
+        String encryptedPath = aes128.encrypt(str);
+        return encryptedPath;
+    }
 
     /**
      * [API. 2] : 로그인 API
      * */
     @PostMapping("/auth/login")
-    public BaseResponse<LoginMemberDto> login(@Validated @RequestBody LoginRequest loginRequest){
-        return new BaseResponse<>(memberService.checkLogin(loginRequest.getKakaoId()));
+    public BaseResponse<LoginMemberDto> login(@RequestAttribute Long kakaoId){
+        return new BaseResponse<>(memberService.checkLogin(kakaoId));
     }
 
     /**

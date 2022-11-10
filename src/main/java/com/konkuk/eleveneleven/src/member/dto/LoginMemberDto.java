@@ -19,5 +19,7 @@ public class LoginMemberDto {
     private Boolean isBelongToRoom;
     private Boolean isRoomOwner;
     private Long roomIdx;
+    private Boolean isBelongToMatchedRoom;
+    private Long matchedRoomIdx;
 
 }

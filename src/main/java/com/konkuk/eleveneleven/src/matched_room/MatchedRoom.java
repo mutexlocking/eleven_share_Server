@@ -28,6 +28,8 @@ public class MatchedRoom extends BasicEntity {
     @Column(name = "matched_room_idx")
     private Long idx;
 
+    private String url;
+
     @JoinColumn(name = "owner_member_idx")
     @OneToOne(fetch = FetchType.LAZY)
     private Member ownerMember;

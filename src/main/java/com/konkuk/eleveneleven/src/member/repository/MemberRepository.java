@@ -13,6 +13,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByKakaoId(Long kakaoId);
 
+    boolean existsByKakaoIdAndStatus(Long kakaoId, Status status);
+
     @Query("select m from Member m where m.kakaoId=:kakaoId")
     Member findByKakaoId(@Param("kakaoId") Long kakaoId);
 
@@ -26,4 +28,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("select m from Member m join fetch m.roomMember rm join fetch rm.room r where m.kakaoId=:kakaoId")
     Optional<Member> findWithRoomOptional(@Param("kakaoId")Long kakaoId);
+
+
 }
