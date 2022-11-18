@@ -102,7 +102,7 @@ public class MemberService {
     //로그인한 Member가 Room을 만들었거나 or 다른사람이 만든 Room에 속한 경우 -> LoginMemberDto를 세팅하는 메소드
     private void setLoginMemberDtoAtBelongRoom(LoginMemberDto loginMemberDto, RoomMember rm){
         loginMemberDto.setScreen(
-                rm.getMember().getRoom().getMatchingYN().equals(MatchingYN.N)
+                rm.getRoom().getMatchingYN().equals(MatchingYN.N)
                 ? Screen.ROOM_SCREEN : Screen.READY_SCREEN);
         loginMemberDto.setIsBelongToRoom(true);
         loginMemberDto.setIsRoomOwner(Optional.ofNullable(rm.getMember().getRoom()).isPresent());
