@@ -10,21 +10,18 @@ import com.konkuk.eleveneleven.config.BaseResponseStatus;
 import com.konkuk.eleveneleven.src.matched_room_member.MatchedRoomMember;
 import com.konkuk.eleveneleven.src.matched_room_member.repository.MatchedRoomMemberRepository;
 import com.konkuk.eleveneleven.src.member.Member;
+import com.konkuk.eleveneleven.src.member.dto.EmailAuthDto;
 import com.konkuk.eleveneleven.src.member.dto.EmailDto;
 import com.konkuk.eleveneleven.src.member.dto.LoginMemberDto;
 import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
-import com.konkuk.eleveneleven.src.member.request.EmailRequest;
 import com.konkuk.eleveneleven.src.room_member.RoomMember;
 import com.konkuk.eleveneleven.src.room_member.repository.RoomMemberRepository;
-import com.konkuk.eleveneleven.src.school.School;
 import com.konkuk.eleveneleven.src.school.repository.SchoolRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -39,14 +36,10 @@ public class MemberService {
     private final MailUtil mailUtil;
 
 
-    private void checkKakaoId(Long kakaoId){
-        if (memberRepository.existsByKakaoId(kakaoId) == false) {
-            throw new BaseException(BaseResponseStatus.FAIL_LOGIN, "로그인 시점 : 요청으로 들어온 kakaoId가 유효하지 않습니다.");
-        }
-    }
 
-    private void checkOnGoing(Long kakaoId){
-        if(memberRepository.existsByKakaoIdAndStatus(kakaoId, Status.ONGOING)){
+
+    private void checkOnGoing(Long memberIdx){
+        if(memberRepository.existsByIdxAndStatus(memberIdx, Status.ONGOING)){
             throw new BaseException(BaseResponseStatus.FAIL_LOGIN, "로그인 시점 : 해당 사용자는 아직 인증이 다 끝나지 않은 사용자 입니다.");
         }
     }
@@ -54,16 +47,16 @@ public class MemberService {
     /**
      * 로그인 서비스
      */
-    public LoginMemberDto checkLogin(Long kakaoId) {
+    public LoginMemberDto checkLogin(Long memberIdx) {
 
-        //0. 인자로 넘겨받은 kakaoId의 유효성 검사
-        checkKakaoId(kakaoId);
-        //또한 해당 사용자가 아직 인증을 다 마치지 않아 ONGOING 상태인지의 여부 검사 (ACTIVE상태일 테지만 validation은 필요)
+
+        //0. 해당 사용자가 아직 인증을 다 마치지 않아 ONGOING 상태인지의 여부 검사 (ACTIVE상태일 테지만 validation은 필요)
         /** 이를 통해 -> 로그인 이후는 무조건 ACTIVE 상태라는 사실이 보장됨 */
-        checkOnGoing(kakaoId);
+        checkOnGoing(memberIdx);
 
         //1. 유효한 kakaoId로 JWT를 생성
-        String token = jwtUtil.createToken(kakaoId.toString());
+        Member member = memberRepository.findByMemberIdx(memberIdx);
+        String token = jwtUtil.createToken(member.getIdx().toString());
 
         //2. Member를 조회하여 , 다음의 상황을 판단
         /**
@@ -72,8 +65,6 @@ public class MemberService {
          * 2_1) 방을 만들었거나 or 다른사람이 만든 방에 소속된 경우 && 이때 매칭버튼을 누르거나 or 누르지 않았거나 -> 해당 방 화면으로 가도록 해야함
          * 2_2) 혹은 (방장이든 일반 상요자든) 이미 매칭이 되어 MatchedRoom에 소속되어 있는 경우 -> MATCHED_ROOM_SCREEN으로 이동하도록!
          * */
-
-        Member member = memberRepository.findByKakaoId(kakaoId);
 
         // Member의 status가 ACTIVE인 경우
         LoginMemberDto loginMemberDto = LoginMemberDto.builder()
@@ -140,7 +131,7 @@ public class MemberService {
 
     /** 인증메일 보내는 서비스 */
     @Transactional
-    public EmailDto sendAuthMail(Long kakaoId, String email){
+    public EmailDto sendAuthMail(Long memberIdx, String email){
 
         //0. 일단 등록된 서울시 내 대학교 메일 계정인지 확인 후
         checkEmailDomain(email);
@@ -149,7 +140,7 @@ public class MemberService {
         String authCode = mailUtil.sendEmail(email);
 
         //2. 그 인증 코드를 DB에 저장
-        updateAuthCode(kakaoId, authCode);
+        updateAuthCode(memberIdx, authCode);
 
         return EmailDto.builder().authCode(authCode).build();
     }
@@ -168,21 +159,23 @@ public class MemberService {
 
     }
 
-    private void updateAuthCode(Long kakaoId, String authCode){
-        Member member = memberRepository.findByKakaoId(kakaoId);
+    private void updateAuthCode(Long memberIdx, String authCode){
+        Member member = memberRepository.findByMemberIdx(memberIdx);
         member.setAuthCode(authCode);
     }
 
     /** 인증메일로 보낸 인증코드의 유효성 검사 서비스 */
-    public String checkAuthCode(Long kakaoId, String authCode){
-        Member member = memberRepository.findByKakaoId(kakaoId);
+    public EmailAuthDto checkAuthCode(Long memberIdx, String authCode){
+        Member member = memberRepository.findByMemberIdx(memberIdx);
 
         if(member.getAuthCode().equals(authCode)==false){
             throw new BaseException(BaseResponseStatus.INVALID_AUTH_CODE, "인증 코드가 일치하지 않아, 이메일 인증에 실패");
 
         }
 
-        return "학교 메일 인증이 정상 처리되었습니다.";
+        return EmailAuthDto.builder()
+                .result("학교 메일 인증이 정상 처리되었습니다.")
+                .build();
     }
 
 
