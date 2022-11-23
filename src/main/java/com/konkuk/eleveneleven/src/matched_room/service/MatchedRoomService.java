@@ -1,6 +1,5 @@
 package com.konkuk.eleveneleven.src.matched_room.service;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
 import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.config.BaseException;
 import com.konkuk.eleveneleven.config.BaseResponseStatus;
@@ -19,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,11 +38,11 @@ public class MatchedRoomService {
 
     /** [오픈채팅 url setting 서비스] */
     @Transactional
-    public UrlDto insertUrl(Long kakaoId, Long matchedRoomIdx, String url){
+    public UrlDto shareUrl(Long memberIdx, Long matchedRoomIdx, String url){
 
         //1_1. 해당 matchedRoomIdx의 PK로써의 유효성을 검사하면서 && 동시에 그 matchedRoom의 Owner가 이 kakaoId를 가진 Member임을 검사
         MatchedRoom matchedRoom = getMatchedRoom(matchedRoomIdx);
-        checkOwner(matchedRoom, kakaoId);
+        checkOwner(matchedRoom, memberIdx);
 
         //1_2. 또한 아직 그 MatchedRoom의 url이 설정되지 않았음을 검사
         checkUrlAlready(matchedRoom);
@@ -91,8 +89,8 @@ public class MatchedRoomService {
         }
     }
 
-    private void checkOwner(MatchedRoom matchedRoom, Long kakaoId){
-        if(matchedRoom.getOwnerMember().getKakaoId()!=kakaoId){
+    private void checkOwner(MatchedRoom matchedRoom, Long memberIdx){
+        if(matchedRoom.getOwnerMember().getIdx()!=memberIdx){
             throw new BaseException(BaseResponseStatus.IS_NOT_MATCHED_ROOM_OWNER, "오픈채팅 url 설정 시점 : url을 설정하려고 하는 사용자가 , 그 MatchedRoom의 방장이 아닙니다.");
         }
     }
@@ -111,13 +109,13 @@ public class MatchedRoomService {
     }
 
     /** [오픈채팅 url 조회 서비스] */
-    public UrlDto getUrl(Long kakaoId, Long matchedRoomIdx){
+    public UrlDto getUrl(Long memberIdx, Long matchedRoomIdx){
 
         //1_1. matchedRoomIdx의 유효성을 검사한 후
         MatchedRoom matchedRoom = getMatchedRoom(matchedRoomIdx);
 
         //1_2. 해당 사용자가 , 그 MatchedRoom에 소속된 Member인지를 검증
-        checkMatchedRoomMember(matchedRoom,kakaoId);
+        checkMatchedRoomMember(matchedRoom,memberIdx);
 
         //1_3. 또한 그 MatchedRoom에 url이 setting되어 있는지 검증
         checkUrl(matchedRoom);
@@ -130,9 +128,9 @@ public class MatchedRoomService {
                 .build();
     }
 
-    private void checkMatchedRoomMember(MatchedRoom matchedRoom, Long kakaoId){
+    private void checkMatchedRoomMember(MatchedRoom matchedRoom, Long memberIdx){
 
-        Member member = memberRepository.findByKakaoId(kakaoId);
+        Member member = memberRepository.findByMemberIdx(memberIdx);
 
         if( !matchedRoomMemberRepository.existsByMemberIdxAndMatchedRoomIdxAndStatus(member.getIdx(), matchedRoom.getIdx(), Status.ACTIVE)){
             throw new BaseException(BaseResponseStatus.IS_NOT_BELEONG_TO_MATCHED_ROOM, "오픈채팅 url 조회 시점 : 해당 사용자는 , 해당 MatchedRoom에 속한 사용자가 아니므로 , url을 공유받을 수 없습니다.");

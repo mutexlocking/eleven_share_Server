@@ -8,7 +8,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ParticipateDto {
+public class MatchingDto {
     private List<MemberDto> memberDtoList;
     private Long roomIdx;
 }

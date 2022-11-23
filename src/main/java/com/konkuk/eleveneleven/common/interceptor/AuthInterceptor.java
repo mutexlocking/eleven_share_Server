@@ -1,6 +1,7 @@
 package com.konkuk.eleveneleven.common.interceptor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.konkuk.eleveneleven.common.enums.Status;
 import com.konkuk.eleveneleven.common.jwt.JwtUtil;
 import com.konkuk.eleveneleven.config.BaseException;
 import com.konkuk.eleveneleven.config.BaseResponse;
@@ -10,6 +11,7 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +22,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthInterceptor implements HandlerInterceptor{
 
     private final JwtUtil jwtUtil;
@@ -27,14 +30,15 @@ public class AuthInterceptor implements HandlerInterceptor{
     private ObjectMapper objectMapper = new ObjectMapper();
     private boolean testResultValue;
 
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         if(Boolean.parseBoolean(request.getHeader("isTest"))){
 
-            Optional.ofNullable(request.getHeader("kakaoId")).ifPresentOrElse(
-                    k -> sendSuccessTest(request, k),
-                    () -> {sendFailTest(response, BaseResponseStatus.NO_KAKAO_ID);}
+            Optional.ofNullable(request.getHeader("memberIdx")).ifPresentOrElse(
+                    k -> sendSuccessTest(request, Long.parseLong(k)),
+                    () -> {sendFailTest(response, BaseResponseStatus.NO_MEMBER_IDX);}
 
             );
             return testResultValue;
@@ -42,18 +46,18 @@ public class AuthInterceptor implements HandlerInterceptor{
 
 
 
-        /**  1. jwtUtil을 사용하여 토큰에 저장된 kakaoId 정보를 꺼냄 */
-        Optional<Claims> kakaoId = Optional.ofNullable(request.getHeader("token"))
+        /**  1. jwtUtil을 사용하여 토큰에 저장된 memberIdx 정보를 꺼냄 */
+        Optional<Claims> memberIdx = Optional.ofNullable(request.getHeader("token"))
                 .map(t -> jwtUtil.parseJwtToken(t));
 
 
         // 만약 해석된 kakaoId 값이 존재하지 않는다면 -> 이는 필수 헤더인 token 값이 존재하지 않았기 떄문 -> 그에 따른 응답을 보낸다
-        if(kakaoId.isEmpty()){
+        if(memberIdx.isEmpty()){
             return sendErrorResponse(response, BaseResponseStatus.NO_JWT_TOKEN);
         }
 
-        // jwt token에 저장된 kakaoId를 꺼내서 , 그 값이 유효한지를 판단
-        if(memberRepository.existsByKakaoId(Long.parseLong(kakaoId.get().getSubject()))==false){
+        // jwt token에 저장된 memberIdx를 꺼내서 , 그 값이 유효한지를 판단
+        if(!memberRepository.existsByIdxAndStatus(Long.parseLong(memberIdx.get().getSubject()), Status.ACTIVE)){
             return sendErrorResponse(response, BaseResponseStatus.INAVALID_JWT_TOKEN);
         }
 
@@ -61,7 +65,7 @@ public class AuthInterceptor implements HandlerInterceptor{
          * Controller에게 요청이 전달하게 해줌 -> 즉 인가를 실행 */
 
 
-        request.setAttribute("kakaoId",Long.parseLong( kakaoId.get().getSubject()));
+        request.setAttribute("memberIdx",Long.parseLong( memberIdx.get().getSubject()));
         return true;
     }
 
@@ -88,8 +92,8 @@ public class AuthInterceptor implements HandlerInterceptor{
         return false;
     }
 
-    private Boolean sendSuccessTest(HttpServletRequest request, String kakaoId){
-        request.setAttribute("kakaoId", Long.parseLong(kakaoId));
+    private Boolean sendSuccessTest(HttpServletRequest request, Long memberIdx){
+        request.setAttribute("memberIdx", memberIdx);
         this.testResultValue = true;
         return true;
     }
@@ -107,7 +111,7 @@ public class AuthInterceptor implements HandlerInterceptor{
             response.getWriter().print(result);
         }
         catch (IOException e){
-            log.error("테스트 시 필수 헤더값인 kakaoId값이 들어오지 않아, 그에따른 응답을 처리하는 과정에서 IOException이 발생하였습니다.");
+            log.error("테스트 시 필수 헤더값인 memberIdx값이 들어오지 않아, 그에따른 응답을 처리하는 과정에서 IOException이 발생하였습니다.");
         }
 
         log.error("EXCEPTION = {}, message = {}", status, status.getMessage());
