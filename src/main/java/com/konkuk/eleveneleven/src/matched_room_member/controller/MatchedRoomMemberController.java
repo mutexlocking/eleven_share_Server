@@ -1,5 +1,6 @@
 package com.konkuk.eleveneleven.src.matched_room_member.controller;
 
+import com.konkuk.eleveneleven.src.matched_room.MatchedRoom;
 import com.konkuk.eleveneleven.src.matched_room_member.dto.GetMatchedRoomMemberRes;
 import com.konkuk.eleveneleven.src.matched_room_member.service.MatchedRoomMemberService;
 import com.konkuk.eleveneleven.src.matched_room_member.vo.MatchingMember;
@@ -26,11 +27,12 @@ public class MatchedRoomMemberController {
     @GetMapping("/member")
     public GetMatchedRoomMemberRes getMatchedRoomMember(@RequestAttribute Long kakaoId) {
         List<Member> matchedRoomMembers = matchedRoomMemberService.getMatchedRoomMember(kakaoId);
+        MatchedRoom matchedRoom = matchedRoomMemberService.getMatchedRoom(kakaoId);
 
-        return getMatchedRoomMemberDto(matchedRoomMembers);
+        return getMatchedRoomMemberDto(matchedRoomMembers, matchedRoom);
     }
 
-    private GetMatchedRoomMemberRes getMatchedRoomMemberDto(List<Member> matchedRoomMembers){
+    private GetMatchedRoomMemberRes getMatchedRoomMemberDto(List<Member> matchedRoomMembers,MatchedRoom matchedRoom){
         List<MatchingMember> matchingMembers = new ArrayList<>();
 
         for (Member matchedRoomMember : matchedRoomMembers){
@@ -42,6 +44,7 @@ public class MatchedRoomMemberController {
         }
 
         return GetMatchedRoomMemberRes.builder()
+                .matchedRoomIdx(matchedRoom.getIdx())
                 .matchingMembers(matchingMembers)
                 .build();
     }

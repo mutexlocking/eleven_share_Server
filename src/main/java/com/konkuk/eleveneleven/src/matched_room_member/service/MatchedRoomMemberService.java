@@ -27,7 +27,7 @@ public class MatchedRoomMemberService {
 
     public List<Member> getMatchedRoomMember(Long kakaoId){
         Long memberIdx = getMemberIdx(kakaoId);
-        MatchedRoom matchedRoom = getMatchedRoomIdx(memberIdx);
+        MatchedRoom matchedRoom = getMatchedRoom(memberIdx);
         Gender memberGender = getMemberGender(kakaoId);
 
         List<MatchedRoomMember> allByMatchedRoomAndStatus = matchedRoomMemberRepository.findAllByMatchedRoomAndStatus(matchedRoom, Status.ACTIVE);
@@ -38,16 +38,18 @@ public class MatchedRoomMemberService {
                 .collect(Collectors.toList());
     }
 
-    private Long getMemberIdx(Long kakaoId){
-        return memberRepository.findByKakaoId(kakaoId).getIdx();
-    }
-    private MatchedRoom getMatchedRoomIdx(Long memberIdx){
+    public MatchedRoom getMatchedRoom(Long memberIdx){
         Optional<MatchedRoomMember> byMemberIdxAndStatus = matchedRoomMemberRepository.findByMemberIdxAndStatus(memberIdx, Status.ACTIVE);
 
         matchFailValidation(byMemberIdxAndStatus);
 
         return byMemberIdxAndStatus.get().getMatchedRoom();
     }
+
+    private Long getMemberIdx(Long kakaoId){
+        return memberRepository.findByKakaoId(kakaoId).getIdx();
+    }
+
 
     private void matchFailValidation(Optional<MatchedRoomMember> byMemberIdxAndStatus){
         if(byMemberIdxAndStatus.isEmpty()) {
