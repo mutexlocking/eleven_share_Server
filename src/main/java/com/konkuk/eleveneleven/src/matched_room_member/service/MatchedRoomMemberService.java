@@ -25,8 +25,7 @@ public class MatchedRoomMemberService {
     private final MemberRepository memberRepository;
     private final MatchedRoomMemberRepository matchedRoomMemberRepository;
 
-    public List<Member> getMatchedRoomMember(Long kakaoId){
-        Long memberIdx = getMemberIdx(kakaoId);
+    public List<Member> getMatchedRoomMember(Long memberIdx){
         MatchedRoom matchedRoom = getMatchedRoom(memberIdx);
         Gender memberGender = getMemberGender(kakaoId);
 
@@ -45,11 +44,6 @@ public class MatchedRoomMemberService {
 
         return byMemberIdxAndStatus.get().getMatchedRoom();
     }
-
-    private Long getMemberIdx(Long kakaoId){
-        return memberRepository.findByKakaoId(kakaoId).getIdx();
-    }
-
 
     private void matchFailValidation(Optional<MatchedRoomMember> byMemberIdxAndStatus){
         if(byMemberIdxAndStatus.isEmpty()) {

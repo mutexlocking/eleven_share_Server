@@ -25,9 +25,9 @@ public class MatchedRoomMemberController {
 
     /** [매칭 후 매칭된 방의 멤버들 확인 API] */
     @GetMapping("/member")
-    public GetMatchedRoomMemberRes getMatchedRoomMember(@RequestAttribute Long kakaoId) {
-        List<Member> matchedRoomMembers = matchedRoomMemberService.getMatchedRoomMember(kakaoId);
-        MatchedRoom matchedRoom = matchedRoomMemberService.getMatchedRoom(kakaoId);
+    public GetMatchedRoomMemberRes getMatchedRoomMember(@RequestAttribute Long memberIdx) {
+        List<Member> matchedRoomMembers = matchedRoomMemberService.getMatchedRoomMember(memberIdx);
+        MatchedRoom matchedRoom = matchedRoomMemberService.getMatchedRoom(memberIdx);
 
         return getMatchedRoomMemberDto(matchedRoomMembers, matchedRoom);
     }
@@ -36,10 +36,16 @@ public class MatchedRoomMemberController {
         List<MatchingMember> matchingMembers = new ArrayList<>();
 
         for (Member matchedRoomMember : matchedRoomMembers){
+            boolean isOwner = false;
+            if(matchedRoomMember.getMatchedRoom() != null) {
+                isOwner = true;
+            }
+
             matchingMembers.add(MatchingMember.builder()
                     .memberName(matchedRoomMember.getName())
                     .schoolName(matchedRoomMember.getSchoolName())
                     .major(matchedRoomMember.getMajor())
+                    .isOwner(isOwner)
                     .build());
         }
 
