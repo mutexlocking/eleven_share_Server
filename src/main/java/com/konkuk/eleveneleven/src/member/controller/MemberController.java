@@ -3,6 +3,7 @@ package com.konkuk.eleveneleven.src.member.controller;
 import com.konkuk.eleveneleven.common.encryption.AES128;
 import com.konkuk.eleveneleven.common.jwt.JwtUtil;
 import com.konkuk.eleveneleven.config.BaseResponse;
+import com.konkuk.eleveneleven.src.member.dto.EmailAuthDto;
 import com.konkuk.eleveneleven.src.member.dto.EmailDto;
 import com.konkuk.eleveneleven.src.member.dto.LoginMemberDto;
 import com.konkuk.eleveneleven.src.member.request.EmailAuthRequest;
@@ -36,17 +37,17 @@ public class MemberController {
      * [API. 2] : 로그인 API
      * */
     @PostMapping("/auth/login")
-    public BaseResponse<LoginMemberDto> login(@RequestAttribute Long kakaoId){
-        return new BaseResponse<>(memberService.checkLogin(kakaoId));
+    public BaseResponse<LoginMemberDto> login(@RequestAttribute Long memberIdx){
+        return new BaseResponse<>(memberService.checkLogin(memberIdx));
     }
 
     /**
      * [API. 3] : 학교 이메일을 받아 , 그 이메일로 인증코드 전송
      * */
     @PostMapping("/auth/email")
-    public BaseResponse<EmailDto> sendEmail(@RequestAttribute Long kakaoId,
+    public BaseResponse<EmailDto> sendEmail(@RequestAttribute Long memberIdx,
                                             @Validated @RequestBody EmailRequest emailRequest){
-        return new BaseResponse<>(memberService.sendAuthMail(kakaoId, emailRequest.getEmail()));
+        return new BaseResponse<>(memberService.sendAuthMail(memberIdx, emailRequest.getEmail()));
     }
 
 
@@ -54,8 +55,9 @@ public class MemberController {
      * [API. 4] : 학교 이메일로 전송한 인증코드 일치 여부 확인
      * */
     @GetMapping("/auth/email")
-    public BaseResponse<String> checkAuthCode(@RequestAttribute Long kakaoId, @Validated @RequestBody EmailAuthRequest emailAuthRequest){
-        return new BaseResponse<>(memberService.checkAuthCode(kakaoId, emailAuthRequest.getAuthCode()));
+    public BaseResponse<EmailAuthDto> checkAuthCode(@RequestAttribute Long memberIdx,
+                                                    @Validated @ModelAttribute EmailAuthRequest emailAuthRequest){
+        return new BaseResponse<>(memberService.checkAuthCode(memberIdx, emailAuthRequest.getAuthCode()));
     }
 
 

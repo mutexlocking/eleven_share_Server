@@ -8,6 +8,7 @@ import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,8 +19,10 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BeforeAuthInterceptor implements HandlerInterceptor {
 
+    private final MemberRepository memberRepository;
     private boolean returnValue;
     private boolean testResultValue;
     private final AES128 aes128;
@@ -33,9 +36,9 @@ public class BeforeAuthInterceptor implements HandlerInterceptor {
 
         if(Boolean.parseBoolean(request.getHeader("isTest"))){
 
-            Optional.ofNullable(request.getHeader("kakaoId")).ifPresentOrElse(
-                    k -> sendSuccessTest(request, k),
-                    () -> {sendFailTest(response, BaseResponseStatus.NO_KAKAO_ID);}
+            Optional.ofNullable(request.getHeader("memberIdx")).ifPresentOrElse(
+                    k -> sendSuccessTest(request, Long.parseLong(k)),
+                    () -> {sendFailTest(response, BaseResponseStatus.NO_MEMBER_IDX);}
 
             );
             return testResultValue;
@@ -43,7 +46,7 @@ public class BeforeAuthInterceptor implements HandlerInterceptor {
 
         // 만약 이 값이 있으면 , 아직 인증을 다 마치지 못한 사용자라고 가정하고 -> 여기서 바로 kakaoId를 attribute로 넣어준다.
         Optional.ofNullable(request.getHeader("encryptedKakaoId")).ifPresentOrElse(
-                ek -> sendSuccess(request, ek),
+                ek -> sendSuccess(request, response, ek),
                 () -> {sendFail(response, BaseResponseStatus.NO_ENCRYPTED_KAKAO_ID);}
         );
 
@@ -51,9 +54,15 @@ public class BeforeAuthInterceptor implements HandlerInterceptor {
 
     }
 
-    private Boolean sendSuccess(HttpServletRequest request, String encryptedKakaoId){
-        String kakaoId = aes128.decrypt(encryptedKakaoId);
-        request.setAttribute("kakaoId", Long.parseLong(kakaoId));
+    private Boolean sendSuccess(HttpServletRequest request, HttpServletResponse response, String encryptedKakaoId){
+        Long kakaoId = Long.parseLong(aes128.decrypt(encryptedKakaoId));
+
+        if(!memberRepository.existsByKakaoId(kakaoId)){
+            sendFail(response, BaseResponseStatus.INVALID_KAKAO_ID);
+            return false;
+        }
+
+        request.setAttribute("memberIdx", memberRepository.findByKakaoId(kakaoId).getIdx());
         this.returnValue = true;
         return true;
     }
@@ -71,7 +80,7 @@ public class BeforeAuthInterceptor implements HandlerInterceptor {
             response.getWriter().print(result);
         }
         catch (IOException e){
-            log.error("모든 인증을 마치기 전까지 필수 헤더값인 encryptedKakaoId값이 들어오지 않아, 그에따른 응답을 처리하는 과정에서 IOException이 발생하였습니다.");
+            log.error("모든 인증을 마치기 전까지 필수 헤더값인 encryptedKakaoId값이 들어오지 않아 or 옳바르지 않은 kakaoId 값이 들어와서 그에따른 응답을 처리하는 과정에서 IOException이 발생하였습니다.");
         }
 
         log.error("EXCEPTION = {}, message = {}", status, status.getMessage());
@@ -79,8 +88,8 @@ public class BeforeAuthInterceptor implements HandlerInterceptor {
         return false;
     }
 
-    private Boolean sendSuccessTest(HttpServletRequest request, String kakaoId){
-        request.setAttribute("kakaoId", Long.parseLong(kakaoId));
+    private Boolean sendSuccessTest(HttpServletRequest request, Long memberIdx){
+        request.setAttribute("memberIdx", memberIdx);
         this.testResultValue = true;
         return true;
     }
@@ -98,7 +107,7 @@ public class BeforeAuthInterceptor implements HandlerInterceptor {
             response.getWriter().print(result);
         }
         catch (IOException e){
-            log.error("테스트 시 필수 헤더값인 kakaoId값이 들어오지 않아, 그에따른 응답을 처리하는 과정에서 IOException이 발생하였습니다.");
+            log.error("테스트 시 필수 헤더값인 memberIdx값이 들어오지 않아, 그에따른 응답을 처리하는 과정에서 IOException이 발생하였습니다.");
         }
 
         log.error("EXCEPTION = {}, message = {}", status, status.getMessage());
