@@ -25,10 +25,9 @@ public class MatchedRoomMemberService {
     private final MemberRepository memberRepository;
     private final MatchedRoomMemberRepository matchedRoomMemberRepository;
 
-    public List<Member> getMatchedRoomMember(Long kakaoId){
-        Long memberIdx = getMemberIdx(kakaoId);
-        MatchedRoom matchedRoom = getMatchedRoomIdx(memberIdx);
-        Gender memberGender = getMemberGender(kakaoId);
+    public List<Member> getMatchedRoomMember(Long memberIdx){
+        MatchedRoom matchedRoom = getMatchedRoom(memberIdx);
+        Gender memberGender = getMemberGender(memberIdx);
 
         List<MatchedRoomMember> allByMatchedRoomAndStatus = matchedRoomMemberRepository.findAllByMatchedRoomAndStatus(matchedRoom, Status.ACTIVE);
 
@@ -38,15 +37,20 @@ public class MatchedRoomMemberService {
                 .collect(Collectors.toList());
     }
 
-    private Long getMemberIdx(Long kakaoId){
-        return memberRepository.findByKakaoId(kakaoId).getIdx();
-    }
-    private MatchedRoom getMatchedRoomIdx(Long memberIdx){
+    public MatchedRoom getMatchedRoom(Long memberIdx){
         Optional<MatchedRoomMember> byMemberIdxAndStatus = matchedRoomMemberRepository.findByMemberIdxAndStatus(memberIdx, Status.ACTIVE);
 
         matchFailValidation(byMemberIdxAndStatus);
 
         return byMemberIdxAndStatus.get().getMatchedRoom();
+    }
+
+    public boolean isOwnerMember(Long memberIdx) {
+        Member byMemberIdx = memberRepository.findByMemberIdx(memberIdx);
+        if(byMemberIdx.getMatchedRoom() != null) {
+            return true;
+        }
+        return false;
     }
 
     private void matchFailValidation(Optional<MatchedRoomMember> byMemberIdxAndStatus){
@@ -55,8 +59,8 @@ public class MatchedRoomMemberService {
         }
     }
 
-    private Gender getMemberGender(Long kakakId){
-        Member memberByKakaoId = memberRepository.findByKakaoId(kakakId);
+    private Gender getMemberGender(Long memberIdx){
+        Member memberByKakaoId = memberRepository.findByMemberIdx(memberIdx);
         return memberByKakaoId.getGender();
     }
 }

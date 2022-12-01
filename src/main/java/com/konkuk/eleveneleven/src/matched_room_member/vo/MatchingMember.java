@@ -14,4 +14,5 @@ public class MatchingMember {
     private String memberName;
     private String schoolName;
     private String major;
+    private boolean isOwner;
 }

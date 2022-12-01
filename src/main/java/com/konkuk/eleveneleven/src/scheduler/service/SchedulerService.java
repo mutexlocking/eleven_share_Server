@@ -21,11 +21,13 @@ public class SchedulerService {
     /** 매일 23시에 Scheduler를 동작하여 matching 진행 */
     @Transactional
 //    @Scheduled(cron = "0 11 23 * * ?")
-//    @Scheduled(cron = "0 32 19 * * ?")
     public void matchRoom() {
         roomMatchingService.randMatchRoom();
         matchedRoomService.migrateRoomToMatchedRoom();
         roomService.deleteAllRoomMemberInDB();
         roomService.deleteAllRoomInDB();
+        // chatRoom 생성
+        // -> Member chatRoomIdx 초기화
+        // -> Member lastChatIdx 초기화
     }
 }
