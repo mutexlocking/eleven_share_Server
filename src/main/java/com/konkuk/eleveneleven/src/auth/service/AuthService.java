@@ -47,9 +47,9 @@ public class AuthService {
 
     }
 
-    public void postAuthMeta(Long kakaoId, PostAuthMetaReqDto postAuthMetaReqDto){
+    public void postAuthMeta(Long memberIdx, PostAuthMetaReqDto postAuthMetaReqDto){
 
-        Member memberByKakaoId = memberRepository.findByKakaoId(kakaoId);
+        Member memberByKakaoId = memberRepository.findByMemberIdx(memberIdx);
 
         if (memberByKakaoId.getStatus().equals(Status.INACTIVE)) {
             throw new BaseException(BaseResponseStatus.BLACK_MEMBER,"DB상에 INACTIVE Member 존재");
