@@ -10,5 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class GetMatchedRoomMemberRes {
+    private long matchedRoomIdx;
+    private boolean isOwner;
     private List<MatchingMember> matchingMembers;
 }
