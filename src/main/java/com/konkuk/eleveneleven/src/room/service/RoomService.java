@@ -354,7 +354,7 @@ public class RoomService {
             throw new BaseException(BaseResponseStatus.IS_NOT_OWNER,"매칭 준비 상태로 변경 시점 : 해당 사용자는 일반 사용자 입니다.");
         }
 
-        if(member.getRoom().getIdx()!=roomIdx){
+        if(!member.getRoom().getIdx().equals(roomIdx)){
             throw new BaseException(BaseResponseStatus.IS_NOT_OWNER, "매칭 준비 상태로 변경 시점 : 매칭 상태를 변경하려는 사용자가 그 방의 방장이 아닙니다.");
         }
     }
