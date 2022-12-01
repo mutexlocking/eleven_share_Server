@@ -13,6 +13,7 @@ import com.konkuk.eleveneleven.src.member.Member;
 import com.konkuk.eleveneleven.src.member.dto.EmailAuthDto;
 import com.konkuk.eleveneleven.src.member.dto.EmailDto;
 import com.konkuk.eleveneleven.src.member.dto.LoginMemberDto;
+import com.konkuk.eleveneleven.src.member.dto.LogoutDto;
 import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
 import com.konkuk.eleveneleven.src.room_member.RoomMember;
 import com.konkuk.eleveneleven.src.room_member.repository.RoomMemberRepository;
@@ -37,6 +38,11 @@ public class MemberService {
 
 
 
+    private void checkActive(Long memberIdx){
+        if(memberRepository.existsByIdxAndStatus(memberIdx, Status.INACTIVE)){
+            throw new BaseException(BaseResponseStatus.INACTIVE_MEMBER, "해당 회원은 회원탈퇴 한 회원입니다.");
+        }
+    }
 
     private void checkOnGoing(Long memberIdx){
         if(memberRepository.existsByIdxAndStatus(memberIdx, Status.ONGOING)){
@@ -49,8 +55,10 @@ public class MemberService {
      */
     public LoginMemberDto checkLogin(Long memberIdx) {
 
+        //0_1. 해당 사용자가 회원탈퇴 한 사용자가 아닌지 검사
+        checkActive(memberIdx);
 
-        //0. 해당 사용자가 아직 인증을 다 마치지 않아 ONGOING 상태인지의 여부 검사 (ACTIVE상태일 테지만 validation은 필요)
+        //0_2. 해당 사용자가 아직 인증을 다 마치지 않아 ONGOING 상태인지의 여부 검사 (ACTIVE상태일 테지만 validation은 필요)
         /** 이를 통해 -> 로그인 이후는 무조건 ACTIVE 상태라는 사실이 보장됨 */
         checkOnGoing(memberIdx);
 
@@ -176,6 +184,31 @@ public class MemberService {
         return EmailAuthDto.builder()
                 .result("학교 메일 인증이 정상 처리되었습니다.")
                 .build();
+    }
+
+    /** ------------------------------------------------------------------------------------------------------------*/
+
+
+    private void checkOngoingAtLogout(Long memberIdx){
+        if(memberRepository.existsByIdxAndStatus(memberIdx, Status.ONGOING)){
+            throw new BaseException(BaseResponseStatus.ONGOING_MEMBER, "아직 인증중인 회원은 회원탈퇴를 할 수 없습니다.");
+        }
+    }
+
+    /** [회원탈퇴 서비스] */
+    @Transactional
+    public LogoutDto checkQuit(Long memberIdx){
+
+        //0. 해당 사용자가 인증을 다 마치지 않은 ONGOING상태인지 확인
+        checkOngoingAtLogout(memberIdx);
+
+        //1. 인증을 다 마 친 경우라면 -> ACTIVE아니면 INACTIVE니까 , 그냥 INACTIVE로 바꿔주면 됨
+        Member member = memberRepository.findByMemberIdx(memberIdx);
+        member.setStatus(Status.INACTIVE);
+        memberRepository.save(member);
+
+        return LogoutDto.builder().result(true).build();
+
     }
 
 
