@@ -6,17 +6,14 @@ import com.konkuk.eleveneleven.config.BaseResponse;
 import com.konkuk.eleveneleven.src.member.dto.EmailAuthDto;
 import com.konkuk.eleveneleven.src.member.dto.EmailDto;
 import com.konkuk.eleveneleven.src.member.dto.LoginMemberDto;
+import com.konkuk.eleveneleven.src.member.dto.LogoutDto;
 import com.konkuk.eleveneleven.src.member.request.EmailAuthRequest;
 import com.konkuk.eleveneleven.src.member.request.EmailRequest;
-import com.konkuk.eleveneleven.src.member.request.LoginRequest;
 import com.konkuk.eleveneleven.src.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @RestController
@@ -58,6 +55,12 @@ public class MemberController {
     public BaseResponse<EmailAuthDto> checkAuthCode(@RequestAttribute Long memberIdx,
                                                     @Validated @ModelAttribute EmailAuthRequest emailAuthRequest){
         return new BaseResponse<>(memberService.checkAuthCode(memberIdx, emailAuthRequest.getAuthCode()));
+    }
+
+    /** [API. 21] : 회원 탈퇴 API*/
+    @PatchMapping("/auth/quit")
+    public BaseResponse<LogoutDto> quit(@RequestAttribute Long memberIdx){
+        return new BaseResponse<>(memberService.checkQuit(memberIdx));
     }
 
 

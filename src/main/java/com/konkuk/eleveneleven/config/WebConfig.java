@@ -2,6 +2,7 @@ package com.konkuk.eleveneleven.config;
 
 import com.konkuk.eleveneleven.common.interceptor.AuthInterceptor;
 import com.konkuk.eleveneleven.common.interceptor.BeforeAuthInterceptor;
+import com.konkuk.eleveneleven.common.interceptor.FirstAuthInterceptor;
 import com.konkuk.eleveneleven.common.interceptor.TimeInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
 
+    private final FirstAuthInterceptor firstAuthInterceptor;
     private final BeforeAuthInterceptor beforeAuthInterceptor;
     private final AuthInterceptor authInterceptor;
     private final TimeInterceptor timeInterceptor;
@@ -24,19 +26,24 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
+        registry.addInterceptor(firstAuthInterceptor)
+                        .order(1)
+                        .addPathPatterns("/auth")
+                        .excludePathPatterns("/css/**", "/*.ico", "/error","/auth/email", "/auth/meta", "/auth/login",
+                                "/room/**", "/matched/room/url/**", "/auth/quit","/room/member");
 
         registry.addInterceptor(beforeAuthInterceptor)
-                .order(1)
-                .addPathPatterns("/auth/email", "/auth/meta", "/auth/login", "/auth")
-                .excludePathPatterns("/css/**", "/*.ico", "/error",  "/room/**", "/test/**", "/matched/room/url/**", "/ocr");
+                .order(2)
+                .addPathPatterns("/auth/email", "/auth/meta", "/auth/login")
+                .excludePathPatterns("/css/**", "/*.ico", "/error",  "/room/**", "/test/**", "/matched/room/url/**", "/ocr", "/auth/quit", "/auth");
 
         registry.addInterceptor(authInterceptor)
-                .order(2)
-                .addPathPatterns("/room/**", "/matched/room/url/**")
+                .order(3)
+                .addPathPatterns("/room/**", "/matched/room/url/**", "/auth/quit")
                 .excludePathPatterns("/css/**", "/*.ico", "/error", "/auth", "/auth/login", "/auth/email", "/auth/meta", "/ocr" ,"/test/**");
 
         registry.addInterceptor(timeInterceptor)
-                .order(3)
+                .order(4)
                 .addPathPatterns("/room", "/room/member")
                 .excludePathPatterns("/css/**", "/*.ico", "/error", "/auth/**", "/ocr", "/test/**", "/matched/**");
     }
