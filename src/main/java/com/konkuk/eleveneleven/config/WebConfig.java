@@ -32,7 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(authInterceptor)
                 .order(2)
-                .addPathPatterns("/room/**", "/matched/room/url/**")
+                .addPathPatterns("/room/**", "/matched/room/url/**", "/matched/room/**")
                 .excludePathPatterns("/css/**", "/*.ico", "/error", "/auth", "/auth/login", "/auth/email", "/auth/meta", "/ocr" ,"/test/**");
 
         registry.addInterceptor(timeInterceptor)
