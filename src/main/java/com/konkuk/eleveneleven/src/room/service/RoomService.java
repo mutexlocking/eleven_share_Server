@@ -274,7 +274,7 @@ public class RoomService {
 
     private MatchingDto deleteRoomMemberAtOwner(Member member){
         member.getRoom().getRoomMemberList().stream()
-                .forEach(rm -> roomMemberRepository.deleteByMemberIdx(rm.getMember().getIdx()));
+                .forEach(rm -> roomMemberRepository.deleteByRoomMemberIdx(rm.getIdx()));
 
         roomRepository.deleteByMemberIdx(member.getIdx());
 
@@ -283,9 +283,10 @@ public class RoomService {
 
     }
 
-    private MatchingDto deleteRoomMemberAtNotOwner(Member member, Long roomIdx){
-        roomMemberRepository.deleteByMemberIdx(member.getIdx());
-        List<MemberDto> allRoomMembers = getAllRoomMembers(member.getRoomMember().getRoom());
+    private MatchingDto deleteRoomMemberAtNotOwner(Member member, Long roomIdx, Long roomMemberIdx){
+        roomMemberRepository.deleteByRoomMemberIdx(roomMemberIdx);
+        Room room = roomRepository.findAtRoomIdx(roomIdx);
+        List<MemberDto> allRoomMembers = getAllRoomMembers(room);
         return MatchingDto.builder().roomIdx(roomIdx).memberDtoList(allRoomMembers).build();
 
     }
@@ -300,19 +301,20 @@ public class RoomService {
         checkMatchingYnAtExit(member.getRoomMember().getRoom()); /** 이미 매칭 준비된 상태면 , 그 방에서 나갈 수 없다. */
 
 
-        //3. (위 검증을 모두 겨쳤다면) kakaoId를 통해 Member~RoomMember~Room을 모두 조회
+        //3. (위 검증을 모두 겨쳤다면) memberIdx를 통해 Member~RoomMember~Room을 모두 조회
         member = memberRepository.findWithRoom(memberIdx);
 
         //4_1. 방장이면
-        if(member.getRoomMember().getRoom().getOwnerMember().getIdx() == memberIdx) {
+        if(member.getRoomMember().getRoom().getOwnerMember().getIdx().equals(memberIdx)) {
             return deleteRoomMemberAtOwner(member);
         }
 
         //4_2. 일반 사용자면
         else{
             // 일단 방에서 나가기 전 (== 그 Member와 관련된 RoomMember를 지우기 전) 먼저 , RoomIdx값을 조회하고
+            Long roomMemberIdx = member.getRoomMember().getIdx();
             Long roomIdx = member.getRoomMember().getRoom().getIdx();
-            return deleteRoomMemberAtNotOwner(member, roomIdx);
+            return deleteRoomMemberAtNotOwner(member, roomIdx, roomMemberIdx);
         }
 
     }
