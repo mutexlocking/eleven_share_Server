@@ -27,15 +27,15 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
     @Query("select rm from RoomMember rm where rm.idx=:idx")
     RoomMember findByIdx(@Param("idx") Long idx);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE RoomMember rm SET rm.room = :newRoom where rm.room = :beforeRoom")
     void updateRoomMemberRoom(@Param("newRoom") Room newRoom, @Param("beforeRoom") Room beforeRoom);
 
 
     /** 여기서 약간 이슈가 있었음 */
-    @Modifying
-    @Query("delete from RoomMember rm where rm.member.idx=:memberIdx")
-    void deleteByMemberIdx(@Param("memberIdx") Long memberIdx);
+    @Modifying(clearAutomatically = true)
+    @Query("delete from RoomMember rm where rm.idx=:roomMemberIdx")
+    void deleteByRoomMemberIdx(@Param("roomMemberIdx") Long roomMemberIdx);
 
     List<RoomMember> findByRoomIdx(Long roomIdx);
 
