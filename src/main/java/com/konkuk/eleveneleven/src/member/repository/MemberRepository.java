@@ -24,13 +24,17 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Member findByIdxAndStatus(Long memberIdx, Status status);
 
     @Query("select m from Member m join fetch m.roomMember rm join fetch rm.room r where m.idx=:memberIdx")
-    Member findWithRoom(@Param("memberIdx") Long memberIdx);
+    Member findWithRoomInfo(@Param("memberIdx") Long memberIdx);
 
     @Query("select m from Member m join fetch m.roomMember rm join fetch rm.room r where m.kakaoId=:kakaoId")
     Optional<Member> findWithRoomOptional(@Param("kakaoId")Long kakaoId);
 
     @Query("select m from Member m where m.idx =:memberIdx")
     Member findByMemberIdx(@Param("memberIdx") Long memberIdx);
+
+    @Query("select m from Member m join fetch m.roomMember rm join fetch rm.room r where m.idx=:memberIdx")
+    Optional<Member> findWithRoomInfoOptional(@Param("memberIdx") Long memberIdx);
+
 
 
 }

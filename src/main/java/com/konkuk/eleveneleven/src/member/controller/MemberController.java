@@ -10,6 +10,7 @@ import com.konkuk.eleveneleven.src.member.dto.LogoutDto;
 import com.konkuk.eleveneleven.src.member.request.EmailAuthRequest;
 import com.konkuk.eleveneleven.src.member.request.EmailRequest;
 import com.konkuk.eleveneleven.src.member.service.MemberService;
+import com.konkuk.eleveneleven.src.room.dto.MatchingYnDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -63,5 +64,10 @@ public class MemberController {
         return new BaseResponse<>(memberService.checkQuit(memberIdx));
     }
 
+    /** [방 매칭 여부 확인 API] : 알림을 보내기 위해 , 특정 방에 속한 회원이 존재할때, 그 방의 상태가 준비상태인지 여부를 보냄 */
+    @GetMapping("/member/status")
+    public BaseResponse<MatchingYnDto> getMatchingYn(@RequestAttribute Long memberIdx){
+        return new BaseResponse<>(memberService.getMatching(memberIdx));
+    }
 
 }

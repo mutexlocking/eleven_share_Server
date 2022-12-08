@@ -302,7 +302,7 @@ public class RoomService {
 
 
         //3. (위 검증을 모두 겨쳤다면) memberIdx를 통해 Member~RoomMember~Room을 모두 조회
-        member = memberRepository.findWithRoom(memberIdx);
+        member = memberRepository.findWithRoomInfo(memberIdx);
 
         //4_1. 방장이면
         if(member.getRoomMember().getRoom().getOwnerMember().getIdx().equals(memberIdx)) {
@@ -331,7 +331,7 @@ public class RoomService {
 
 
         /** 어차피 위 로직을 통과했다는건 , 그 방에 방장이라는 의미이니깐 , Member는 OwnerMember이고 , 그 OwnerMember가 만든 방이 이 Room*/
-        member = memberRepository.findWithRoom(memberIdx);
+        member = memberRepository.findWithRoomInfo(memberIdx);
         Room room = roomRepository.findAtRoomIdx(roomIdx);
         checkNumOfRoomMemberAtMatching(member); // 방 인원수가 2명에서 6명 사이인지 검사
 
@@ -372,5 +372,9 @@ public class RoomService {
             throw new BaseException(BaseResponseStatus.INVALID_NUM_OF_MATCHING, "매칭 준비 상태로 변경 시점 : 방 인원수가 2명 이상 6명 이하일 때만 매칭 준비를 할 수 있습니다.");
         }
     }
+
+    /** ------------------------------------------------------------------------------------------------------*/
+
+
 
 }

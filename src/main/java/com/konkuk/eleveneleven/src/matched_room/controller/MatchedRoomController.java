@@ -31,4 +31,6 @@ public class MatchedRoomController {
         return new BaseResponse<>(matchedRoomService.getUrl(memberIdx, matchedRoomIdx));
     }
 
+
+
 }
