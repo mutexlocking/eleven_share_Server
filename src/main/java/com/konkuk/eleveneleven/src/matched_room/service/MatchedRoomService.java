@@ -90,7 +90,7 @@ public class MatchedRoomService {
     }
 
     private void checkOwner(MatchedRoom matchedRoom, Long memberIdx){
-        if(matchedRoom.getOwnerMember().getIdx()!=memberIdx){
+        if(!matchedRoom.getOwnerMember().getIdx().equals(memberIdx)){
             throw new BaseException(BaseResponseStatus.IS_NOT_MATCHED_ROOM_OWNER, "오픈채팅 url 설정 시점 : url을 설정하려고 하는 사용자가 , 그 MatchedRoom의 방장이 아닙니다.");
         }
     }
