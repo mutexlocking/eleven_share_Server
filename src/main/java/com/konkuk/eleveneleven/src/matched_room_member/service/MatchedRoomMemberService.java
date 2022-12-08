@@ -80,7 +80,7 @@ public class MatchedRoomMemberService {
                         }
                 );
 
-        boolean isOwner = matchedRoomMember.getMatchedRoom().getOwnerMember().getIdx() == memberIdx;
+        boolean isOwner = matchedRoomMember.getMatchedRoom().getOwnerMember().getIdx().equals(memberIdx);
 
 
         //2_1. 방장인 경우 방까지 삭제

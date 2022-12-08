@@ -31,7 +31,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://db-konkuk-project.cy8bbga73uwg.ap-northeast-2.rds.amazonaws.com:3306/eleven_db?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://database-konkuk.cxep7ikjimy9.ap-northeast-2.rds.amazonaws.com:3306/eleven_db?serverTimezone=Asia/Seoul
     username: admin
     password: konkukpw2022
 
