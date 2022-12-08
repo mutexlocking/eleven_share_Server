@@ -15,6 +15,7 @@ import com.konkuk.eleveneleven.src.member.dto.EmailDto;
 import com.konkuk.eleveneleven.src.member.dto.LoginMemberDto;
 import com.konkuk.eleveneleven.src.member.dto.LogoutDto;
 import com.konkuk.eleveneleven.src.member.repository.MemberRepository;
+import com.konkuk.eleveneleven.src.room.dto.MatchingYnDto;
 import com.konkuk.eleveneleven.src.room_member.RoomMember;
 import com.konkuk.eleveneleven.src.room_member.repository.RoomMemberRepository;
 import com.konkuk.eleveneleven.src.school.repository.SchoolRepository;
@@ -211,7 +212,24 @@ public class MemberService {
 
     }
 
+    /** -------------------------------------------------------------------------------------------------------*/
 
+    /** [매칭 정보를 조회하는 서비스] */
+    public MatchingYnDto getMatching(Long memberIdx){
+
+        //1. 방에 속한 Member를 조회 -> 이때 그런 방에 속한 멤버가 없으면 예외 발생
+        Member member = memberRepository.findWithRoomInfoOptional(memberIdx).orElseThrow(
+                () -> {
+                    throw new BaseException(BaseResponseStatus.NOT_BELONG_TO_ROOM, "매칭 여부 조회 시점 : 해당 사용자는 어느 방에도 속하지 않은 사용자 입니다.");
+                }
+        );
+
+        //2. 조회한 Member 정보를 바탕으로 , 매칭 여부 결과를 boolean 값으로 치환
+        boolean result = member.getRoomMember().getRoom().getMatchingYN()==MatchingYN.Y ? true : false;
+
+        //3. 결과 반환
+        return MatchingYnDto.builder().result(result).build();
+    }
 
 
 }

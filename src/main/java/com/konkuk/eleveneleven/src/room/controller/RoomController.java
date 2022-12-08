@@ -2,6 +2,7 @@ package com.konkuk.eleveneleven.src.room.controller;
 
 import com.konkuk.eleveneleven.config.BaseResponse;
 import com.konkuk.eleveneleven.src.room.dto.MatchingDto;
+import com.konkuk.eleveneleven.src.room.dto.MatchingYnDto;
 import com.konkuk.eleveneleven.src.room.dto.RoomDto;
 import com.konkuk.eleveneleven.src.room.request.MatchingRequest;
 import com.konkuk.eleveneleven.src.room.request.RoomCodeRequest;
@@ -45,6 +46,8 @@ public class RoomController {
                                                   @Validated @RequestBody MatchingRequest matchingRequest) {
         return new BaseResponse<>(roomService.matching(memberIdx, matchingRequest.getRoomIdx()));
     }
+
+
 
 }
 

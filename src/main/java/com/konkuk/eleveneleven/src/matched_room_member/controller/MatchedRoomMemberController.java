@@ -1,16 +1,15 @@
 package com.konkuk.eleveneleven.src.matched_room_member.controller;
 
+import com.konkuk.eleveneleven.config.BaseResponse;
 import com.konkuk.eleveneleven.src.matched_room.MatchedRoom;
+import com.konkuk.eleveneleven.src.matched_room_member.dto.DeleteMatchedRoomMemberDto;
 import com.konkuk.eleveneleven.src.matched_room_member.dto.GetMatchedRoomMemberRes;
 import com.konkuk.eleveneleven.src.matched_room_member.service.MatchedRoomMemberService;
 import com.konkuk.eleveneleven.src.matched_room_member.vo.MatchingMember;
 import com.konkuk.eleveneleven.src.member.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +53,14 @@ public class MatchedRoomMemberController {
                 .isOwner(isOwner)
                 .matchingMembers(matchingMembers)
                 .build();
+    }
+
+
+    /** [MathcedRoom에서 나가는 API ] */
+    @DeleteMapping("/matched/room/member/{matchedRoomIdx}")
+    public BaseResponse<DeleteMatchedRoomMemberDto> deleteMatchedRoom(@RequestAttribute Long memberIdx,
+                                                                      @PathVariable Long matchedRoomIdx){
+        return new BaseResponse<>(matchedRoomMemberService.goOutMatchedRoom(memberIdx, matchedRoomIdx));
     }
 
 }
