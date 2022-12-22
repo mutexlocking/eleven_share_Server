@@ -30,27 +30,27 @@ public class MemberController {
     private final MemberService memberService;
     private final AES256 aes256;
 
-//    @GetMapping("/aes")
-//    public String aes(@RequestParam String str){
-//        String encryptedPath = "";
-//        try {
-//            encryptedPath = aes256.encrypt(str);
-//        } catch (Exception e) {
-//            throw new BaseException(BaseResponseStatus.ENCRYPT_FAIL, "AES256 암호화 시점에서 에러 터짐");
-//        }
-//        return encryptedPath;
-//    }
-//
-//    @GetMapping("/aes/decryption")
-//    public String decryption(@RequestParam String str){
-//        String decryptedPath = null;
-//        try {
-//            decryptedPath = aes256.decrypt(str);
-//        } catch (Exception e) {
-//            throw new BaseException(BaseResponseStatus.FAIL_DECRYPT, "AES256 복호화 시점에서 에러 터짐");
-//        }
-//        return decryptedPath;
-//    }
+    @GetMapping("/aes")
+    public String aes(@RequestParam String str){
+        String encryptedPath = "";
+        try {
+            encryptedPath = aes256.encrypt(str);
+        } catch (Exception e) {
+            throw new BaseException(BaseResponseStatus.ENCRYPT_FAIL, "AES256 암호화 시점에서 에러 터짐");
+        }
+        return encryptedPath;
+    }
+
+    @GetMapping("/aes/decryption")
+    public String decryption(@RequestParam String str){
+        String decryptedPath = null;
+        try {
+            decryptedPath = aes256.decrypt(str);
+        } catch (Exception e) {
+            throw new BaseException(BaseResponseStatus.FAIL_DECRYPT, "AES256 복호화 시점에서 에러 터짐");
+        }
+        return decryptedPath;
+    }
 
     /**
      * [API. 2] : 로그인 API

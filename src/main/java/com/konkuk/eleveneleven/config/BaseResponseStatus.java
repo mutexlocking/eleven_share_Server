@@ -82,7 +82,7 @@ public enum BaseResponseStatus {
     IS_NOT_MATCHED_ROOM_OWNER(false, 2463, "해당 사용자는 MatchedRoom의 방장이 아닙니다."),
     ALREADY_SETTING_URL(false, 2464, "이미 오픈채팅 url이 설정된 MatchedRoom 입니다."),
     IS_NOT_BELEONG_TO_MATCHED_ROOM(false, 2465, "이 MatchedRoom에 속한 사용자가 아닙니다."),
-    IS_NOT_SETTING_URL(false, 2466, "이 MatchedRoom에는 아직 오픈채팅 url이 설정되어 있지 않습니다."),
+    IS_NOT_SETTING_URL(false, 2466, "아직 방장이 오픈채팅 url을 공유하지 않았습니다."),
     IS_NOT_OPEN_URL(false, 2467, "이 url은 오픈채팅 url이 아닙니다."),
     ALREADY_DELETE_MATCHED_ROOM(false, 2468, "해당 MatchedRoom은 이미 삭제되었습니다."),
     FAIL_TO_MATCHING(false, 3501, "매칭에 실패한 유저입니다."),
