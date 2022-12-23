@@ -17,25 +17,20 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
     @Query("select mr from RoomMember mr join fetch mr.room r join fetch r.ownerMember m where mr.member.idx=:memberIdx and mr.status=:status")
     Optional<RoomMember> findByMemberIdxAndStatus(@Param("memberIdx") Long memberIdx, @Param("status")Status status);
 
-    @Query("select rm from RoomMember rm where rm.member.idx=:memberIdx and rm.status=:status and rm.room.idx=:roomIdx")
-    RoomMember findByMemberIdxAndStatusAndRoomIdx(@Param("memberIdx") Long memberIdx, @Param("status")Status status, @Param("roomIdx")Long roomIdx);
-
     boolean existsByMemberIdxAndStatus(Long memberIdx, Status status);
-
-    boolean existsByMemberIdxAndStatusAndRoomIdx(Long memberIdx, Status status, Long roomIdx);
 
     @Query("select rm from RoomMember rm where rm.idx=:idx")
     RoomMember findByIdx(@Param("idx") Long idx);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE RoomMember rm SET rm.room = :newRoom where rm.room = :beforeRoom")
     void updateRoomMemberRoom(@Param("newRoom") Room newRoom, @Param("beforeRoom") Room beforeRoom);
 
 
     /** 여기서 약간 이슈가 있었음 */
-    @Modifying
-    @Query("delete from RoomMember rm where rm.member.idx=:memberIdx")
-    void deleteByMemberIdx(@Param("memberIdx") Long memberIdx);
+    @Modifying(clearAutomatically = true)
+    @Query("delete from RoomMember rm where rm.idx=:roomMemberIdx")
+    void deleteByRoomMemberIdx(@Param("roomMemberIdx") Long roomMemberIdx);
 
     List<RoomMember> findByRoomIdx(Long roomIdx);
 

@@ -33,9 +33,9 @@ public class AuthController {
      * Stauts -> ACTIVE
      * */
     @PostMapping("/meta")
-    public BaseResponse<String> postAuthMeta(@RequestAttribute Long kakaoId, @RequestBody PostAuthMetaReqDto postAuthMetaReqDto){
+    public BaseResponse<String> postAuthMeta(@RequestAttribute Long memberIdx, @RequestBody PostAuthMetaReqDto postAuthMetaReqDto){
 
-        authService.postAuthMeta(kakaoId,postAuthMetaReqDto);
+        authService.postAuthMeta(memberIdx,postAuthMetaReqDto);
 
         return new BaseResponse<>("데이터 저장에 성공했습니다.");
 

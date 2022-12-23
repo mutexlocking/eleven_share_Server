@@ -12,7 +12,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
@@ -22,10 +21,21 @@ import java.util.Optional;
 public class TimeInterceptor implements HandlerInterceptor{
 
     private ObjectMapper objectMapper = new ObjectMapper();
+    private Boolean testResultValue;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
+        /** 테스트 요청시 , TimeInterceptor가 동작하지 않도록 */
+        if(Boolean.parseBoolean(request.getHeader("isTest"))){
+
+            Optional.ofNullable(request.getHeader("memberIdx")).ifPresentOrElse(
+                    k -> sendSuccessTest(request, Long.parseLong(k)),
+                    () -> {sendFailTest(response, BaseResponseStatus.NO_MEMBER_IDX);}
+
+            );
+            return testResultValue;
+        }
 
         /** 현재 시간을 조회하여 , 시간이 23:12 ~ 11:10 이면 -> 방생성 / 방 참여 / 방 나가기 API를 호출하지 못하도록 제어 */
         LocalTime now = LocalTime.now();
@@ -54,6 +64,34 @@ public class TimeInterceptor implements HandlerInterceptor{
         }
 
         log.error("EXCEPTION = {}, message = {}", status, status.getMessage());
+        return false;
+    }
+
+
+    private Boolean sendSuccessTest(HttpServletRequest request, Long memberIdx){
+        request.setAttribute("memberIdx", memberIdx);
+        this.testResultValue = true;
+        return true;
+    }
+
+    private Boolean sendFailTest(HttpServletResponse response, BaseResponseStatus status){
+
+        //응답의 meta 정보를 setting한 후
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        try {
+            //실질적인 응답값을 , JSON 형식의 String으로 변환화여 보낸다. (단 BaseResponse라는 공통 응답 형식을 지키면서)
+            String result = objectMapper.writeValueAsString(new BaseResponse(status));
+            response.getWriter().print(result);
+        }
+        catch (IOException e){
+            log.error("테스트 시 필수 헤더값인 memberIdx값이 들어오지 않아, 그에따른 응답을 처리하는 과정에서 IOException이 발생하였습니다.");
+        }
+
+        log.error("EXCEPTION = {}, message = {}", status, status.getMessage());
+        this.testResultValue = false;
         return false;
     }
 }

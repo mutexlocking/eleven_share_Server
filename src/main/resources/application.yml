@@ -31,14 +31,14 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://db-konkuk-project.cy8bbga73uwg.ap-northeast-2.rds.amazonaws.com:3306/eleven_db?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://database-konkuk.cxep7ikjimy9.ap-northeast-2.rds.amazonaws.com:3306/eleven_db?serverTimezone=Asia/Seoul
     username: admin
     password: konkukpw2022
 
   jpa:
     open-in-view: true # open session in view 를 true로 설정하므로써 -> 트랜잭션 범위 내에서만 SQL이 나가게 된다. -> 즉 SQL이 남발하여 나가는 상황을 막게 됨
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     properties:
       hibernate:
         #        show_sql: true
